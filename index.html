@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mira 名簿</title>
+
+<!-- ホーム画面アプリ設定 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mira 名簿">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- アイコン（canvas で絵文字から自動生成） -->
+<link id="apple-touch-icon" rel="apple-touch-icon" sizes="180x180">
+<link id="favicon" rel="icon" type="image/png">
+
+<script>
+// 🎨 絵文字からアイコンを生成
+(function(){
+  try {
+    const sz = 180;
+    const c = document.createElement('canvas');
+    c.width = c.height = sz;
+    const ctx = c.getContext('2d');
+    // 背景グラデーション
+    const g = ctx.createLinearGradient(0,0,sz,sz);
+    g.addColorStop(0,'#2c2c2c');
+    g.addColorStop(1,'#1a5fa8');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.roundRect(0,0,sz,sz,36);
+    ctx.fill();
+    // 絵文字
+    ctx.font = '100px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🎨', sz/2, sz/2+6);
+    const url = c.toDataURL('image/png');
+    document.getElementById('apple-touch-icon').href = url;
+    document.getElementById('favicon').href = url;
+  } catch(e){}
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fff;--bg2:#f7f6f3;--bg3:#f0efe9;--text:#1a1a1a;--text2:#666;--text3:#aaa;--border:#e0ddd6;--border2:#ccc;--green:#2d7a4f;--green-bg:#edf7f1;--red:#c0392b;--red-bg:#fdf0ef;--blue:#1a5fa8;--blue-bg:#eef4fb;--amber:#a06c00;--amber-bg:#fdf8ec;--purple:#6b3fa0;--purple-bg:#f3eefb;}
+body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;font-size:14px;color:var(--text);background:var(--bg2);min-height:100vh;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.app{max-width:1200px;margin:0 auto;padding:16px}
+.header{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header h1{font-size:17px;font-weight:700}
+.header p{font-size:12px;color:var(--text2);margin-top:2px}
+.tabs{display:flex;gap:2px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:7px 13px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:500;transition:all .15s;white-space:nowrap}
+.tab.active{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:14px}
+.section{display:none}.section.active{display:block}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-weight:600;font-size:11px;color:var(--text2);border-bottom:2px solid var(--border);white-space:nowrap;background:var(--bg2)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.b-on{background:var(--green-bg);color:var(--green)}
+.b-off{background:var(--red-bg);color:var(--red)}
+.b-ticket{background:var(--purple-bg);color:var(--purple)}
+.b-info{background:var(--blue-bg);color:var(--blue)}
+.btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text);font-weight:500;transition:all .15s}
+.btn:hover{background:var(--bg3)}
+.btn-p{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-p:hover{opacity:.85}
+.btn-r{color:var(--red);border-color:#f5c6c2}
+.btn-r:hover{background:var(--red-bg)}
+.btn-sm{padding:4px 9px;font-size:12px}
+input,select,textarea{padding:7px 10px;border:1px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);width:100%;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-color:transparent}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:12px;font-weight:600;color:var(--text2)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--bg3);border-radius:10px;padding:14px;text-align:center}
+.stat-n{font-size:24px;font-weight:700;margin-bottom:2px}
+.stat-l{font-size:11px;color:var(--text2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.ch{text-align:center;font-size:10px;color:var(--text2);padding:3px 0;font-weight:600}
+.cd{text-align:center;padding:5px 2px;border-radius:7px;cursor:pointer;font-size:12px;min-height:28px;border:1px solid transparent;transition:all .12s}
+.cd:hover{background:var(--bg3)}
+.cd.hc{background:var(--blue-bg);color:var(--blue);font-weight:600;border-color:#b8d4f0}
+.cd.sel{border-color:var(--text)!important;font-weight:700;background:var(--bg3)}
+.cd.emp{cursor:default;pointer-events:none;color:transparent}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:14px;border:1px solid var(--border);padding:22px;width:min(520px,95vw);margin:auto}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:16px}
+.prog{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;flex:1}
+.pbar{height:100%;background:var(--green);border-radius:3px}
+@media(max-width:620px){.g2,.g3,.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div><h1>🎨 アート教室 名簿管理</h1><p id="hd-sub">Cosmic art Mira｜2026年4月名簿</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-p" onclick="openAdd()">＋ 生徒追加</button>
+      <button class="btn" onclick="exportCSV()">📥 CSV</button>
+      <button class="btn" onclick="exportJSON()" style="background:#edf7f1;border-color:#2d7a4f;color:#2d7a4f;font-weight:600">💾 データ保存</button>
+      <button class="btn" onclick="document.getElementById('imp-file').click()" style="background:#eef4fb;border-color:#1a5fa8;color:#1a5fa8;font-weight:600">📂 データ読込</button>
+      <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importJSON(this)">
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('members')">在籍名簿</button>
+    <button class="tab" onclick="showTab('lp')">退会予定 <span id="lp-n" style="background:var(--red-bg);color:var(--red);font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:3px"></span></button>
+    <button class="tab" onclick="showTab('daily')">日別出席</button>
+    <button class="tab" onclick="showTab('monthly')">月別まとめ</button>
+    <button class="tab" onclick="showTab('history')">入退会履歴</button>
+  </div>
+
+  <!-- 在籍名簿 -->
+  <div id="tab-members" class="section active">
+    <div class="card">
+      <div class="stats" id="st-row"></div>
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="氏名・ふりがな検索..." style="width:200px" oninput="renderM()">
+        <select id="f-cls" onchange="renderM()" style="width:130px">
+          <option value="">全クラス</option>
+          <option>幼児</option><option>小学生</option><option>Jr.</option>
+          <option>絵画専門</option><option>イラスト</option><option>工芸デザイン</option>
+          <option>建築造形</option><option>個別</option>
+        </select>
+        <select id="f-st" onchange="renderM()" style="width:120px">
+          <option value="">在籍中のみ</option>
+          <option value="ticket">チケット制</option>
+          <option value="inactive">退会済</option>
+          <option value="all">全員表示</option>
+        </select>
+        <span id="mc" style="font-size:12px;color:var(--text2);margin-left:auto"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>氏名／ふりがな</th><th>学年</th><th>クラス</th>
+            <th>受講日程</th><th>月回</th><th>時間</th>
+            <th>月謝</th><th>電話番号</th><th>入会日</th><th>状態</th>
+            <th style="width:80px"></th>
+          </tr></thead>
+          <tbody id="mt"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 退会予定 -->
+  <div id="tab-lp" class="section">
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn btn-r" onclick="openAddLP()">＋ 退会申請を追加</button>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">退会・チケット制移行の申込一覧。未処理は黄色背景で表示。</p>
+      <div style="overflow-x:auto">
+        <table><thead><tr>
+          <th>申込日</th><th>氏名</th><th>種別</th><th>退会希望月</th><th>理由</th><th style="width:110px">対応</th>
+        </tr></thead><tbody id="lpt"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日別出席 -->
+  <div id="tab-daily" class="section">
+    <div style="display:grid;grid-template-columns:210px 1fr;gap:14px">
+      <div class="card" style="padding:12px">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">
+          <button class="btn btn-sm" onclick="prevM()" style="padding:3px 8px">‹</button>
+          <span id="ct" style="font-size:12px;font-weight:700;flex:1;text-align:center"></span>
+          <button class="btn btn-sm" onclick="nextM()" style="padding:3px 8px">›</button>
+        </div>
+        <div class="cal-grid" id="cg"></div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text2)">
+          <span style="display:inline-block;width:10px;height:10px;background:var(--blue-bg);border:1px solid #b8d4f0;border-radius:2px;margin-right:4px"></span>出席記録あり
+        </div>
+        <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+          <button class="btn btn-sm" style="width:100%;margin-bottom:4px" onclick="printDaily()">🖨️ この日を印刷</button>
+          <button class="btn btn-sm btn-p" style="width:100%" onclick="printMonthAll()">📋 月の全日を一括印刷</button>
+        </div>
+      </div>
+      <div id="daily-sheet">
+        <div style="text-align:center;padding:60px 0;color:var(--text3);font-size:13px">← カレンダーから日付を選んでください</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 月別まとめ -->
+  <div id="tab-monthly" class="section">
+    <div class="card">
+      <div class="toolbar">
+        <select id="msel" onchange="renderMo()" style="width:160px"></select>
+        <button class="btn btn-p" onclick="exportMonth()" style="margin-left:8px">📄 月別名簿を出力・CSV</button>
+      </div>
+      <div class="stats" id="most"></div>
+      <div style="overflow-x:auto">
+        <table><thead><tr>
+          <th>氏名</th><th>クラス</th><th>授業回数</th><th>出席</th><th>欠席</th><th>未記録</th><th>出席率</th>
+        </tr></thead><tbody id="mob"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 履歴 -->
+  <div id="tab-history" class="section">
+    <div class="card">
+      <div style="overflow-x:auto">
+        <table><thead><tr>
+          <th>日付</th><th>氏名</th><th>変更内容</th><th>備考</th>
+        </tr></thead><tbody id="hb"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 生徒追加モーダル -->
+<!-- 生徒追加・編集モーダル -->
+<div id="ao" class="overlay">
+  <div class="modal" style="width:min(600px,95vw)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 id="ao-title" style="margin:0">＋ 生徒を追加</h3>
+      <div id="ao-status-btns" style="display:none;gap:6px">
+        <button class="btn btn-sm" onclick="setStatus('active')" id="btn-active" style="font-size:11px">在籍中</button>
+        <button class="btn btn-sm" onclick="setStatus('ticket')" id="btn-ticket" style="font-size:11px">チケット制</button>
+        <button class="btn btn-sm btn-r" onclick="triggerLeave()" id="btn-leave" style="font-size:11px">退会処理</button>
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">氏名 *</div><input id="an" placeholder="山田 花子"></div>
+      <div class="fg"><div class="fl">ふりがな</div><input id="ak" placeholder="やまだ はなこ"></div>
+    </div>
+    <div class="g3" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">学年</div><input id="ag" placeholder="小3・年長など"></div>
+      <div class="fg"><div class="fl">月謝（円）</div><input id="af" type="number" placeholder="8000"></div>
+      <div class="fg"><div class="fl">電話番号</div><input id="at" placeholder="090-0000-0000"></div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">クラス</div>
+        <input id="acls" placeholder="小学生 / 小学生/イラスト など" list="cls-dl">
+        <datalist id="cls-dl">
+          <option value="幼児"><option value="小学生"><option value="Jr.">
+          <option value="絵画専門"><option value="イラスト"><option value="工芸デザイン">
+          <option value="建築造形"><option value="個別">
+          <option value="小学生/イラスト"><option value="小学生/個別">
+          <option value="小学生/建築造形"><option value="絵画専門/工芸デザイン">
+        </datalist>
+      </div>
+      <div class="fg"><div class="fl">受講日程</div><input id="asch" placeholder="第1,3土曜 / 第2,4土曜"></div>
+    </div>
+    <div class="g3" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">時間</div><input id="atm" placeholder="17:10 / 15:00"></div>
+      <div class="fg"><div class="fl">月回</div><input id="acnt" type="number" placeholder="2"></div>
+      <div class="fg"><div class="fl">入会日</div><input id="aj" type="date"></div>
+    </div>
+    <div class="fg" style="margin-bottom:14px">
+      <div class="fl">備考</div><input id="anote" placeholder="店頭払い・振込など">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeAdd()">キャンセル</button>
+      <button class="btn btn-p" onclick="saveM()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 退会モーダル -->
+<div id="lo" class="overlay">
+  <div class="modal"><h3 id="lt">退会処理</h3>
+    <div class="fg" style="margin-bottom:10px"><div class="fl">退会日</div><input id="ld" type="date"></div>
+    <div class="fg" style="margin-bottom:14px"><div class="fl">理由・備考</div><input id="ln" placeholder="引越し・体調不良など"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeLeave()">キャンセル</button>
+      <button class="btn btn-r" onclick="confLeave()">退会処理する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 退会申請追加モーダル -->
+<div id="lpo" class="overlay">
+  <div class="modal"><h3>退会申請を追加</h3>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">氏名</div><input id="lpn" placeholder="山田 花子"></div>
+      <div class="fg"><div class="fl">種別</div>
+        <select id="lpt2"><option>退会</option><option>チケット制移行</option></select>
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">退会希望月</div><input id="lpm" placeholder="4月末"></div>
+      <div class="fg"><div class="fl">申込日</div><input id="lpd" type="date"></div>
+    </div>
+    <div class="fg" style="margin-bottom:14px"><div class="fl">理由</div><input id="lpr" placeholder="時間確保困難など"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="document.getElementById('lpo').classList.remove('open')">キャンセル</button>
+      <button class="btn btn-p" onclick="saveLP()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<datalist id="staff-dl">
+  <option value="井坂楓華"><option value="関根里佳"><option value="安部昌代">
+  <option value="村岡幸子"><option value="松橋理子"><option value="増原杏斗">
+</datalist>
+
+<script>
+// ===== データ =====
+let nextId = 1;
+let members = [];
+let attendance = {};
+let history = [];
+let leaveRequests = [];
+let selD = null;
+let lvId = null;
+let editId = null;
+let calY = new Date().getFullYear();
+let calM = new Date().getMonth() + 1;
+
+const DAY_NAMES = ['日','月','火','水','木','金','土'];
+const WEEK_LABELS = ['第1','第2','第3','第4','第5'];
+
+// ===== 生徒データ（2026年4月名簿より） =====
+const CSV_DATA = [
+  {name:"阿久井健以",kana:"あくいけい",grade:"年長",schedule:"毎週金曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"09099710293",joinDate:"2026-02-23"},
+  {name:"東 芽生",kana:"あずまめい",grade:"小4",schedule:"第1,3土曜",count:"2",time:"15:00",cls:"イラスト",fee:"8500",tel:"08030903076",joinDate:"2024-03-04"},
+  {name:"阿部 さくら",kana:"あべ さくら",grade:"小3",schedule:"第1,3日曜",count:"2",time:"13:00",cls:"小学生",fee:"9800",tel:"09065477771",joinDate:"2024-06-27"},
+  {name:"飯村 晃太",shopfront:true,kana:"いいむら こうた",grade:"",schedule:"第1土曜 / 第4日曜",count:"2",time:"13:00",cls:"小学生",fee:"8000",tel:"09027201481",joinDate:"2026-03-01"},
+  {name:"石井 詞乃",kana:"いしい ことの",grade:"小5",schedule:"第1,2,3木曜",count:"3",time:"17:10",cls:"小学生",fee:"8900",tel:"08044466433",joinDate:"2024-03-04"},
+  {name:"石井 智陽",kana:"いしい ともはる",grade:"小3",schedule:"第1,3日曜",count:"2",time:"15:30",cls:"小学生",fee:"8000",tel:"09035976741",joinDate:"2024-03-17"},
+  {name:"石井律",kana:"いしいりつ",grade:"小5",schedule:"第2,4金曜 / 第1,3金曜",count:"4",time:"17:10/17:00",cls:"小学生/イラスト",fee:"12500",tel:"09055703176",joinDate:"2025-11-29"},
+  {name:"石内真璃奈",kana:"いしうちまりな",grade:"中1",schedule:"第1,3火曜",count:"2",time:"17:00",cls:"個別",fee:"10000",tel:"09071884115",joinDate:"2025-06-17"},
+  {name:"石川ゆかり",kana:"いしかわ ゆかり",grade:"",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"小学生",fee:"8000",tel:"09022016725",joinDate:"2026-03-01"},
+  {name:"石塚 慶一",kana:"いしつか けいいち",grade:"年中",schedule:"第1,3金曜",count:"2",time:"16:10",cls:"幼児",fee:"6800",tel:"09074151667",joinDate:"2026-03-03"},
+  {name:"伊藤はる",kana:"いとうはる",grade:"",schedule:"第1,3月曜",count:"2",time:"15:30",cls:"個別",fee:"10300",tel:"",joinDate:"2026-03-01"},
+  {name:"井上 悠",kana:"いのうえはるか",grade:"小5",schedule:"第2,4日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"07055483440",joinDate:"2024-04-16"},
+  {name:"入江 花織",shopfront:true,kana:"いりえかおり",grade:"",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"9500",tel:"",joinDate:"2026-03-01"},
+  {name:"岩瀬実優",kana:"いわせみゆ",grade:"小5",schedule:"第2,4日曜",count:"2",time:"13:00",cls:"工芸デザイン",fee:"8000",tel:"09060294109",joinDate:"2025-08-26"},
+  {name:"岩谷アルミン",kana:"いわやあるみん",grade:"小2",schedule:"第1,3日曜",count:"2",time:"15:30/13:00",cls:"小学生",fee:"8900",tel:"08037580615",joinDate:"2025-07-27"},
+  {name:"馬引 侑夏",shopfront:true,kana:"うまびきゆうか",grade:"中1",schedule:"第1,2土曜",count:"2",time:"13:00",cls:"工芸デザイン",fee:"9500",tel:"09025289554",joinDate:"2024-03-23"},
+  {name:"袁 海翔",kana:"えんかいと",grade:"小2",schedule:"毎週木曜",count:"4",time:"15:35",cls:"小学生",fee:"9800",tel:"08040572276",joinDate:"2025-04-23"},
+  {name:"大串あやの",shopfront:true,kana:"おおぐしあやの",grade:"",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"9500",tel:"09042863395",joinDate:"2026-03-01"},
+  {name:"大塚 莉央",kana:"おおつかりお",grade:"中2",schedule:"第1,2日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"08033128571",joinDate:"2024-06-10"},
+  {name:"大野 紗良",kana:"おおのさら",grade:"小5",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"9500",tel:"09061605459",joinDate:"2024-11-11"},
+  {name:"大原魁斗",kana:"おおはらかいと",grade:"",schedule:"毎週金曜",count:"4",time:"15:10",cls:"幼児",fee:"8600",tel:"09087414646",joinDate:"2026-03-01"},
+  {name:"大村 明織",kana:"おおむらみおり",grade:"小5",schedule:"第3,4金曜",count:"2",time:"17:00",cls:"絵画専門",fee:"8500",tel:"08041147715",joinDate:"2024-07-17"},
+  {name:"大和田 美帆",kana:"おおわだみほ",grade:"小4",schedule:"第1,3土曜 / 第2,4土曜",count:"4",time:"13:00/10:00",cls:"小学生",fee:"9800",tel:"09019747835",joinDate:"2025-04-12"},
+  {name:"岡安 康大",shopfront:true,kana:"おかやすこうだい",grade:"小4",schedule:"第2,4日曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"09052060059",joinDate:"2024-03-09"},
+  {name:"小倉 寧々",kana:"おぐらねね",grade:"小6",schedule:"第1,2,3木曜",count:"3",time:"17:10",cls:"小学生",fee:"8900",tel:"09091983147",joinDate:"2024-07-04"},
+  {name:"小島 沙也乃",kana:"おじまさやの",grade:"小4",schedule:"第1,3金曜",count:"2",time:"17:10",cls:"小学生",fee:"8000",tel:"09043866390",joinDate:"2024-03-04"},
+  {name:"貝瀬 友啓",kana:"かいせともひろ",grade:"中2",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"4500",tel:"08020321559",joinDate:"2024-03-07"},
+  {name:"貝瀬 由衣",kana:"かいせゆい",grade:"",schedule:"第1,3土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"08020321559",joinDate:"2026-03-01"},
+  {name:"茅岡 華",kana:"かやおかはる",grade:"",schedule:"第1,3火曜 / 第2,4火曜",count:"4",time:"17:10/17:00",cls:"小学生/個別",fee:"",tel:"09064814819",joinDate:"2026-03-01"},
+  {name:"茅岡 蕗",kana:"かやおかふき",grade:"小5",schedule:"第1,3火曜 / 第2,4火曜",count:"4",time:"17:10/17:00",cls:"小学生/個別",fee:"21600",tel:"09064814819",joinDate:"2025-07-02"},
+  {name:"川嵜詩乃",kana:"かわさきしの",grade:"小5",schedule:"第1,2,3金曜",count:"3",time:"17:10",cls:"小学生",fee:"8900",tel:"08065131395",joinDate:"2024-03-04"},
+  {name:"川崎 知佳",kana:"かわさきちか",grade:"小5",schedule:"第1,3土曜",count:"2",time:"15:00",cls:"イラスト",fee:"8500",tel:"05035936659",joinDate:"2024-03-04"},
+  {name:"川名沙來",kana:"かわなさら",grade:"小1",schedule:"毎週金曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"09030010498",joinDate:"2025-12-19"},
+  {name:"川村 遙子",kana:"かわむらはるこ",grade:"小5",schedule:"第1,2木曜",count:"2",time:"17:10",cls:"小学生",fee:"15000",tel:"08099946631",joinDate:"2024-03-04"},
+  {name:"川村 颯子",kana:"かわむらふうこ",grade:"",schedule:"第1,2木曜",count:"2",time:"17:10",cls:"小学生",fee:"",tel:"08099946631",joinDate:"2026-03-01"},
+  {name:"神田 涼乃",kana:"かんだすずの",grade:"小2",schedule:"第1,3水曜",count:"2",time:"17:10",cls:"小学生",fee:"8000",tel:"08073343345",joinDate:"2024-03-04"},
+  {name:"北岡実沙紀",kana:"きたおかみさき",grade:"小2",schedule:"第2,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"09036859446",joinDate:"2025-11-08"},
+  {name:"北澤 周",shopfront:true,kana:"きたざわあまね",grade:"",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"9500",tel:"",joinDate:"2026-03-01"},
+  {name:"木村心咲",shopfront:true,kana:"きむらみさき",grade:"年中",schedule:"毎週火曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"09036859446",joinDate:"2025-09-30"},
+  {name:"國川莉瑚",kana:"くにかわりこ",grade:"小2",schedule:"毎週火曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"09017232039",joinDate:"2025-09-29"},
+  {name:"熊倉 佳歩",kana:"くまくらかほ",grade:"小3",schedule:"毎週水曜",count:"4",time:"15:35",cls:"小学生",fee:"9800",tel:"09040721315",joinDate:"2024-12-10"},
+  {name:"倉田 仁",kana:"くらたひとし",grade:"小5",schedule:"第1,3水曜 / 第2,4水曜",count:"4",time:"17:10/17:00",cls:"小学生/建築造形",fee:"12500",tel:"09083447851",joinDate:"2024-03-16"},
+  {name:"栗原汐雫",kana:"くりはら しずく",grade:"小4",schedule:"毎週火曜",count:"4",time:"17:00",cls:"イラスト",fee:"14000",tel:"08056820254",joinDate:"2025-03-04"},
+  {name:"小井土 愛果",kana:"こいどあいか",grade:"小6",schedule:"第1日曜",count:"1",time:"10:00",cls:"Jr.",fee:"5500",tel:"09072057082",joinDate:"2025-06-01"},
+  {name:"向後 楓美",kana:"こうごふみ",grade:"",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"幼児",fee:"6800",tel:"08064291441",joinDate:"2026-03-01"},
+  {name:"根田 咲希",kana:"こんださき",grade:"小5",schedule:"第1,3日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"09052425344",joinDate:"2024-10-05"},
+  {name:"酒井 絢斗",kana:"さかいけんと",grade:"小2",schedule:"第1,2土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"08020252837",joinDate:"2025-06-07"},
+  {name:"櫻山あいり",kana:"さくらやまあいり",grade:"",schedule:"第2,4土曜",count:"2",time:"10:00",cls:"小学生",fee:"8000",tel:"08041626117",joinDate:"2026-03-01"},
+  {name:"佐々木 咲香",kana:"ささきえみか",grade:"小2",schedule:"毎週月曜",count:"4",time:"15:35",cls:"小学生",fee:"9800",tel:"09052048020",joinDate:"2024-03-04"},
+  {name:"佐々木 ひかり",kana:"ささきひかり",grade:"小5",schedule:"第3,4火曜",count:"2",time:"17:00",cls:"イラスト",fee:"8500",tel:"09027697182",joinDate:"2024-11-27"},
+  {name:"佐藤 貝莉",kana:"さとうしぇり",grade:"小1",schedule:"毎週火曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"08026450862",joinDate:"2024-03-11"},
+  {name:"佐藤旬",kana:"さとうしゅん",grade:"中1",schedule:"第3,4金曜",count:"2",time:"17:00",cls:"絵画専門",fee:"8500",tel:"09082096852",joinDate:"2025-12-22"},
+  {name:"佐藤 稀理",kana:"さとうまれり",grade:"小6",schedule:"第1,3水曜",count:"2",time:"17:00",cls:"絵画専門",fee:"8000",tel:"08010973852",joinDate:"2024-03-04"},
+  {name:"佐藤 ゆり",shopfront:true,kana:"さとうゆり",grade:"",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"9500",tel:"",joinDate:"2026-03-01"},
+  {name:"佐野周",kana:"さのあまね",grade:"小2",schedule:"毎週金曜",count:"4",time:"15:10",cls:"個別",fee:"9800",tel:"09062866292",joinDate:"2025-09-25"},
+  {name:"喜（シ）古楽（ジラ）",kana:"しじら",grade:"中1",schedule:"毎週木曜",count:"4",time:"17:00",cls:"絵画専門",fee:"9500",tel:"08045546669",joinDate:"2026-03-01"},
+  {name:"柴 悠人",kana:"しば はると",grade:"小3",schedule:"第1,2日曜 / 第3,4土曜",count:"4",time:"13:00",cls:"絵画専門/工芸デザイン",fee:"16000",tel:"09061849810",joinDate:"2024-10-13"},
+  {name:"清水 心陽",kana:"しみず こはる",grade:"小6",schedule:"第1,3金曜",count:"2",time:"17:10",cls:"小学生",fee:"8000",tel:"08069184621",joinDate:"2024-03-10"},
+  {name:"ジャワラ美咲",kana:"じゃわらみら",grade:"小1",schedule:"第1,3,4木曜",count:"3",time:"15:35",cls:"小学生",fee:"8900",tel:"08032006752",joinDate:"2025-12-21"},
+  {name:"庄司 小春",kana:"しょうじこはる",grade:"小5",schedule:"第2,3水曜",count:"2",time:"17:10",cls:"小学生",fee:"8000",tel:"09099687054",joinDate:"2024-03-10"},
+  {name:"尚文清",kana:"しょうぶんせい",grade:"小4",schedule:"毎週月曜",count:"4",time:"15:35",cls:"小学生",fee:"9800",tel:"07013286969",joinDate:"2025-11-30"},
+  {name:"ズーチェン ナイト",kana:"ずーちぇんないと",grade:"",schedule:"第1,3土曜",count:"2",time:"13:00",cls:"建築造形",fee:"9500",tel:"",joinDate:"2026-03-01"},
+  {name:"菅野 啓太郎",kana:"すがのけいたろう",grade:"小4",schedule:"第1,3土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"09017318434",joinDate:"2024-03-10"},
+  {name:"杉山 愛奈",kana:"すぎやまあいな",grade:"小3",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"小学生",fee:"8000",tel:"09007311396",joinDate:"2024-03-04"},
+  {name:"助川ゆい",shopfront:true,kana:"すけがわゆい",grade:"",schedule:"第1,3土曜",count:"2",time:"15:30",cls:"小学生",fee:"8000",tel:"09015021193",joinDate:"2026-03-01"},
+  {name:"鈴木 小晴",kana:"すずきこはる",grade:"小5",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"小学生",fee:"8000",tel:"09055456573",joinDate:"2025-07-06"},
+  {name:"染宮 ひまり",kana:"そめみやひまり",grade:"小4",schedule:"第1,3日曜",count:"2",time:"15:30",cls:"小学生",fee:"8000",tel:"09015026009",joinDate:"2024-03-09"},
+  {name:"高木 菜緒",kana:"たかぎ なお",grade:"",schedule:"第1,3土曜",count:"2",time:"15:30",cls:"小学生",fee:"8000",tel:"09076364621",joinDate:"2026-02-21"},
+  {name:"髙田 瑠鈴",kana:"たかだるり",grade:"",schedule:"第2,4水曜",count:"2",time:"17:00",cls:"建築造形",fee:"9500",tel:"",joinDate:"2026-03-01"},
+  {name:"髙橋 史佳",kana:"たかはしふみか",grade:"小4",schedule:"第2,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"08020461092",joinDate:"2024-03-10"},
+  {name:"高橋真由実",kana:"たかはしまゆみ",grade:"小2",schedule:"毎週木曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"08050041581",joinDate:"2025-06-24"},
+  {name:"高柳 七楓",kana:"たかやなぎななか",grade:"小1",schedule:"毎週土曜",count:"4",time:"13:00",cls:"小学生",fee:"9800",tel:"09040385783",joinDate:"2024-06-22"},
+  {name:"瀧 千咲",kana:"たきちさき",grade:"",schedule:"第1,3土曜",count:"2",time:"15:30",cls:"小学生",fee:"7000",tel:"09091502576",joinDate:"2026-03-01"},
+  {name:"瀧 日和",kana:"たきひより",grade:"中2",schedule:"第1,3土曜",count:"2",time:"13:00",cls:"工芸デザイン",fee:"9500",tel:"09091502576",joinDate:"2024-03-04"},
+  {name:"竹内新",kana:"たけうちあらた",grade:"年長",schedule:"毎週月曜",count:"4",time:"15:10",cls:"幼児",fee:"8600",tel:"09073489116",joinDate:"2025-12-02"},
+  {name:"竹之内勇吹",shopfront:"振込",kana:"たけのうちいぶき",grade:"年長",schedule:"第2,4土曜",count:"2",time:"10:00",cls:"幼児",fee:"6800",tel:"09029104387",joinDate:"2025-11-06"},
+  {name:"田島 千紗",kana:"たじまちさ",grade:"年長",schedule:"第1,3金曜",count:"2",time:"16:00",cls:"個別",fee:"8300",tel:"09029016531",joinDate:"2024-08-23"},
+  {name:"田代 光",kana:"たしろひかる",grade:"年長",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"幼児",fee:"6800",tel:"09027410625",joinDate:"2025-01-09"},
+  {name:"舘野芽依",kana:"たてのめい",grade:"",schedule:"第1,3日曜 / 第2,4水曜",count:"4",time:"15:30/15:35",cls:"小学生",fee:"9800",tel:"",joinDate:"2026-03-01"},
+  {name:"田中 桃子",kana:"たなかももこ",grade:"",schedule:"第2,4日曜",count:"2",time:"15:00",cls:"Jr.",fee:"8500",tel:"09024167159",joinDate:"2026-03-01"},
+  {name:"田中 悠太",kana:"たなかゆうた",grade:"中1",schedule:"第1,3土曜",count:"2",time:"13:00",cls:"建築造形",fee:"9500",tel:"09024167159",joinDate:"2024-03-10"},
+  {name:"田沼 蒼彩",kana:"たぬまあおい",grade:"小4",schedule:"第3,4木曜",count:"2",time:"17:00",cls:"工芸デザイン",fee:"9500",tel:"08035700828",joinDate:"2024-03-10"},
+  {name:"田村 瑛菜",kana:"たむらはな",grade:"小6",schedule:"第2日曜",count:"1",time:"15:00",cls:"Jr.",fee:"5500",tel:"09074771414",joinDate:"2024-03-04"},
+  {name:"千葉茉莉香",kana:"ちばまりか",grade:"小5",schedule:"毎週火曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"09046790654",joinDate:"2025-12-05"},
+  {name:"塚原歩花",kana:"つかはらほのか",grade:"小6",schedule:"第1,2,3金曜",count:"3",time:"17:10",cls:"小学生",fee:"8900",tel:"08066784569",joinDate:"2024-03-11"},
+  {name:"内藤 可菜",kana:"ないとうありな",grade:"小1",schedule:"第2,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"08066680012",joinDate:"2024-12-07"},
+  {name:"中井 希美",shopfront:true,kana:"なかいのぞみ",grade:"小6",schedule:"第1,3日曜",count:"2",time:"10:00",cls:"Jr.",fee:"8000",tel:"09026530348",joinDate:"2024-03-09"},
+  {name:"中野 佳帆",kana:"なかのかほ",grade:"中1",schedule:"第1,2日曜",count:"2",time:"10:00",cls:"Jr.",fee:"9500",tel:"09010483658",joinDate:"2024-03-07"},
+  {name:"中村 朔",kana:"なかむらさく",grade:"小2",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"小学生",fee:"13800",tel:"08065341700",joinDate:"2024-03-04"},
+  {name:"中村莉海",kana:"なかむらりみ",grade:"中3",schedule:"第2,3,4金曜",count:"3",time:"17:00",cls:"個別",fee:"10900",tel:"09038126866",joinDate:"2025-03-14"},
+  {name:"中村れい",kana:"なかむられい",grade:"",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"幼児",fee:"",tel:"08065341700",joinDate:"2026-03-01"},
+  {name:"中山 依吹",kana:"なかやまいぶき",grade:"小4",schedule:"第1,3土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"09025682999",joinDate:"2024-03-10"},
+  {name:"中山京汰郎",kana:"なかやまけいたろう",grade:"",schedule:"毎週金曜",count:"4",time:"17:00",cls:"個別",fee:"11800",tel:"09091417725",joinDate:"2026-03-01"},
+  {name:"中山 雪乃",kana:"なかやまゆきの",grade:"小5",schedule:"第1,3土曜",count:"2",time:"15:00",cls:"イラスト",fee:"8500",tel:"08054921230",joinDate:"2024-03-04"},
+  {name:"夏目小琴",kana:"なつめこと",grade:"小2",schedule:"第1,3,4木曜",count:"3",time:"15:35",cls:"小学生",fee:"8900",tel:"08014958892",joinDate:"2025-07-30"},
+  {name:"錦井 彩希",kana:"にしきいあき",grade:"",schedule:"第1,3火曜",count:"2",time:"16:10",cls:"小学生",fee:"8000",tel:"09073661332",joinDate:"2026-03-01"},
+  {name:"西出双葉",kana:"にしでふたば",grade:"年長",schedule:"第2,4日曜",count:"2",time:"10:00",cls:"幼児",fee:"6800",tel:"08031878756",joinDate:"2025-07-27"},
+  {name:"二之宮 慶仁",kana:"にのみやけいと",grade:"小4",schedule:"第2,3火曜",count:"2",time:"17:00",cls:"イラスト",fee:"8500",tel:"08041667377",joinDate:"2024-04-14"},
+  {name:"沼尻千景",kana:"ぬまじりちかげ",grade:"小5",schedule:"第1,3日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"08054063861",joinDate:"2025-03-16"},
+  {name:"沼田 ほなみ",kana:"ぬまたほなみ",grade:"",schedule:"毎週月曜",count:"4",time:"17:10",cls:"小学生",fee:"",tel:"08042950426",joinDate:"2026-03-01"},
+  {name:"沼田 みちひ",kana:"ぬまたみちひ",grade:"小3",schedule:"毎週月曜",count:"4",time:"17:00",cls:"絵画専門",fee:"17400",tel:"08042950426",joinDate:"2024-03-05"},
+  {name:"野崎理子",kana:"のざきりこ",grade:"年長",schedule:"毎週木曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"08054063861",joinDate:"2025-03-14"},
+  {name:"橋本実結",kana:"はしもとみゆ",grade:"小4",schedule:"第3,4日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"09053373237",joinDate:"2025-12-17"},
+  {name:"林 怜典",kana:"はやし れいすけ",grade:"年少",schedule:"毎週月曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"07026490708",joinDate:"2026-02-27"},
+  {name:"原田 ゆず葉",shopfront:true,kana:"はらだゆずは",grade:"",schedule:"毎週月曜",count:"4",time:"15:35",cls:"小学生",fee:"8800",tel:"09017379663",joinDate:"2026-03-01"},
+  {name:"原田 ゆり子",shopfront:true,kana:"はらだゆりこ",grade:"中2",schedule:"第2,4日曜",count:"2",time:"15:00",cls:"Jr.",fee:"5500",tel:"09017379663",joinDate:"2024-03-10"},
+  {name:"春馬 一十",kana:"はるまいと",grade:"小3",schedule:"第1土曜 / 第2,4土曜",count:"3",time:"11:00/10:00",cls:"小学生",fee:"8900",tel:"09060185329",joinDate:"2025-04-12"},
+  {name:"朴 惠凛",kana:"ぴょうえりん",grade:"小2",schedule:"毎週土曜",count:"4",time:"10:00",cls:"小学生",fee:"9800",tel:"09061365706",joinDate:"2024-11-30"},
+  {name:"兵頭 翔",kana:"ひょうどうしょう",grade:"",schedule:"第1,2金曜",count:"2",time:"17:00",cls:"個別",fee:"10000",tel:"",joinDate:"2026-03-01"},
+  {name:"平出 雫月",kana:"ひらいでしづく",grade:"小6",schedule:"第1,3土曜 / 第1日曜",count:"3",time:"11:00/13:00",cls:"小学生",fee:"8900",tel:"09040159038",joinDate:"2024-03-07"},
+  {name:"平野 千鶴",kana:"ひらのちづる",grade:"小2",schedule:"第3,4木曜",count:"2",time:"17:10",cls:"小学生",fee:"8000",tel:"09049356075",joinDate:"2025-05-19"},
+  {name:"平山 いろは",kana:"ひらやまいろは",grade:"小5",schedule:"第2,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"09022324142",joinDate:"2024-03-09"},
+  {name:"范 雨果",kana:"ふぁんゆうごう",grade:"小5",schedule:"第2,4土曜",count:"2",time:"10:00",cls:"小学生",fee:"8000",tel:"08088824512",joinDate:"2024-11-25"},
+  {name:"馮得与",kana:"ふうとくよ",grade:"年中",schedule:"毎週土曜",count:"4",time:"14:30",cls:"幼児",fee:"8600",tel:"08037371752",joinDate:"2025-12-03"},
+  {name:"福島葵",kana:"ふくしまあおい",grade:"小3",schedule:"第2,4土曜",count:"2",time:"13:00",cls:"小学生",fee:"8000",tel:"09024820531",joinDate:"2025-12-01"},
+  {name:"星茜",kana:"ほしあかね",grade:"小1",schedule:"毎週火曜",count:"4",time:"16:10",cls:"幼児",fee:"8600",tel:"09098584943",joinDate:"2025-09-03"},
+  {name:"細田 るな",kana:"ほそだるな",grade:"小4",schedule:"第1,3金曜",count:"2",time:"17:10",cls:"小学生",fee:"8000",tel:"09070157552",joinDate:"2024-05-18"},
+  {name:"程田 真衣",kana:"ほどたまい",grade:"小5",schedule:"第1,3土曜",count:"2",time:"15:30",cls:"小学生",fee:"8000",tel:"08039322969",joinDate:"2024-03-10"},
+  {name:"町田 華",kana:"まちだはな",grade:"小2",schedule:"第1,3土曜",count:"2",time:"10:00",cls:"小学生",fee:"8000",tel:"09026147845",joinDate:"2024-08-11"},
+  {name:"松井 透矢",kana:"まついとうや",grade:"小1",schedule:"毎週火曜",count:"4",time:"16:00",cls:"個別",fee:"10300",tel:"09061681130",joinDate:"2024-10-15"},
+  {name:"松下 鈴",kana:"まつしたすず",grade:"小3",schedule:"第1,3土曜 / 第2,4土曜",count:"4",time:"11:00/15:00",cls:"小学生/イラスト",fee:"12500",tel:"09038360629",joinDate:"2024-03-04"},
+  {name:"Mallar Dey",shopfront:true,kana:"まらー でい",grade:"",schedule:"毎週火曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"81 9057 8248 4873",joinDate:"2026-03-01"},
+  {name:"三宅梨瑚",kana:"みやけりこ",grade:"小5",schedule:"第2,4金曜",count:"2",time:"17:00",cls:"絵画専門",fee:"8500",tel:"09047571233",joinDate:"2025-11-17"},
+  {name:"宮﨑 惇",kana:"みやざきじゅん",grade:"小6",schedule:"第2日曜",count:"1",time:"15:00",cls:"Jr.",fee:"5500",tel:"09047234707",joinDate:"2024-03-04"},
+  {name:"武藤凪花",kana:"むとうなか",grade:"小3",schedule:"第1,2月曜 / 第3,4月曜",count:"4",time:"17:10/17:00",cls:"小学生/絵画専門",fee:"12500",tel:"09080405682",joinDate:"2025-02-03"},
+  {name:"村田愛佳",kana:"むらた あいか",grade:"小3",schedule:"第1,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"09069340361",joinDate:"2025-02-09"},
+  {name:"諸岡 詩乃",kana:"もろおかしの",grade:"小2",schedule:"第1,2,3水曜",count:"3",time:"15:35",cls:"小学生",fee:"8900",tel:"08065892938",joinDate:"2024-03-13"},
+  {name:"柳下 慶晴",kana:"やぎしたよしはる",grade:"",schedule:"第1,3,4木曜",count:"3",time:"16:10",cls:"幼児",fee:"7700",tel:"08010109019",joinDate:"2026-03-01"},
+  {name:"矢口愛莉",kana:"やぐちあいり",grade:"年長",schedule:"第1,3月曜",count:"2",time:"15:35",cls:"小学生",fee:"8000",tel:"09092439114",joinDate:"2025-10-20"},
+  {name:"矢口すばる",kana:"やぐちすばる",grade:"年中",schedule:"第1,3土曜",count:"2",time:"14:30",cls:"幼児",fee:"6800",tel:"08054772743",joinDate:"2025-07-28"},
+  {name:"安永清奈",kana:"やすながせいな",grade:"小1",schedule:"第2,4月曜",count:"2",time:"15:35",cls:"小学生",fee:"6800",tel:"09055060351",joinDate:"2025-09-15"},
+  {name:"矢田 陽彩",kana:"やだひいろ",grade:"小4",schedule:"第1,3水曜",count:"2",time:"17:00",cls:"建築造形",fee:"9500",tel:"08044957383",joinDate:"2024-03-05"},
+  {name:"山岡摛莉依",kana:"やまおかりりい",grade:"",schedule:"毎週木曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"9071815116",joinDate:"2026-03-01"},
+  {name:"山口 楓",kana:"やまぐちかえで",grade:"",schedule:"第2,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"",joinDate:"2026-03-01"},
+  {name:"山古百々花",kana:"やまこももか",grade:"小2",schedule:"第2,4土曜",count:"2",time:"11:00",cls:"小学生",fee:"8000",tel:"08034795766",joinDate:"2025-12-16"},
+  {name:"山田 真彰",kana:"やまださねあき",grade:"小4",schedule:"第1,3日曜",count:"2",time:"13:00",cls:"小学生",fee:"",tel:"09072396563",joinDate:"2024-03-04"},
+  {name:"山田 紘真",kana:"やまだひろちか",grade:"",schedule:"第2,4日曜",count:"2",time:"10:00",cls:"幼児",fee:"13800",tel:"09072396563",joinDate:"2026-03-01"},
+  {name:"山田葉",kana:"やまだよう",grade:"小6",schedule:"第2,4日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"09051186541",joinDate:"2025-09-15"},
+  {name:"弓田 栞那",kana:"ゆみだかんな",grade:"小4",schedule:"第2,4日曜",count:"2",time:"13:00",cls:"絵画専門",fee:"8500",tel:"08010295299",joinDate:"2024-03-04"},
+  {name:"吉村 廉央",kana:"よしむられお",grade:"小1",schedule:"第1,3土曜",count:"2",time:"14:30",cls:"幼児",fee:"6800",tel:"09084531126",joinDate:"2024-03-04"},
+  {name:"與那嶺 侑佳",kana:"よなみね ゆうか",grade:"小4",schedule:"毎週月曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"08017069080",joinDate:"2024-03-04"},
+  {name:"劉蘇都",kana:"リュウソド",grade:"小6",schedule:"第1,3土曜",count:"2",time:"13:00",cls:"建築造形",fee:"9500",tel:"08032780903",joinDate:"2025-06-25"},
+  {name:"渡辺彩花",kana:"わたなべあやか",grade:"小4",schedule:"第4土曜",count:"1",time:"10:00",cls:"小学生",fee:"8000",tel:"09072249183",joinDate:"2025-07-19"},
+  {name:"渡辺 帆南",kana:"わたなべはんな",grade:"小5",schedule:"毎週水曜",count:"4",time:"17:10",cls:"小学生",fee:"9800",tel:"08068180054",joinDate:"2024-03-04"},
+  {name:"東 柑那",kana:"あずまかんな",grade:"",schedule:"第2,3,4土曜",count:"3",time:"14:30",cls:"幼児",fee:"7700",tel:"",joinDate:"2026-04-01"}
+];
+
+// 初期化
+CSV_DATA.forEach(d => {
+  members.push({id: nextId++, ...d, status: 'active'});
+});
+// 履歴初期化
+members.forEach(m => {
+  history.push({date: m.joinDate, name: m.name, action: '入会', note: m.cls + ' ' + m.schedule});
+});
+
+// 退会予定リスト（既知の申請）
+leaveRequests = [
+  {date:'2026/03/15',name:'増田絆菜',type:'退会',month:'3月末',reason:'通う時間の確保が難しくなった',done:true},
+  {date:'2026/03/14',name:'鈴木あさ',type:'退会',month:'3月末',reason:'時間確保困難',done:true},
+  {date:'2026/03/14',name:'矢口愛莉',type:'退会',month:'4月末',reason:'時間確保・他習い事との両立困難',done:false},
+  {date:'2026/03/12',name:'吉村廉央',type:'退会',month:'4月末',reason:'子どもが興味を示さなくなった',done:false},
+  {date:'2026/03/12',name:'大塚莉央',type:'退会',month:'4月末',reason:'進学・部活・勉強との両立困難',done:false},
+];
+
+// ===== タブ切替 =====
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((b,i) => {
+    b.classList.toggle('active', ['members','lp','daily','monthly','history'][i] === t);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  if(t==='members') renderM();
+  if(t==='lp') renderLP();
+  if(t==='daily') renderCal();
+  if(t==='monthly') renderMo();
+  if(t==='history') renderH();
+}
+
+// ===== 在籍名簿 =====
+function renderM() {
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  const fc = document.getElementById('f-cls').value;
+  const fs = document.getElementById('f-st').value;
+
+  const fl = members.filter(m => {
+    if(!(m.name + m.kana).toLowerCase().includes(q)) return false;
+    if(fc && m.cls !== fc) return false;
+    if(fs === 'inactive') return m.status === 'inactive';
+    if(fs === 'ticket') return m.status === 'ticket';
+    if(fs === 'all') return true;
+    return m.status === 'active';
+  });
+
+  document.getElementById('mc').textContent = fl.length + '名表示';
+
+  const active = members.filter(m => m.status==='active').length;
+  const ticket = members.filter(m => m.status==='ticket').length;
+  const inactive = members.filter(m => m.status==='inactive').length;
+  const rev = members.filter(m => m.status==='active').reduce((s,m) => s + (Number(m.fee)||0), 0);
+  const pn = leaveRequests.filter(r => !r.done).length;
+
+  document.getElementById('lp-n').textContent = pn || '';
+  document.getElementById('st-row').innerHTML = `
+    <div class="stat"><div class="stat-n" style="color:var(--green)">${active}</div><div class="stat-l">在籍中</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--purple)">${ticket}</div><div class="stat-l">チケット制</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--red)">${inactive}</div><div class="stat-l">退会済</div></div>
+    <div class="stat"><div class="stat-n">${rev.toLocaleString()}</div><div class="stat-l">月謝合計（円）</div></div>`;
+
+  document.getElementById('mt').innerHTML = fl.map(m => `
+    <tr>
+      <td>
+        <div style="font-weight:600">${m.name}</div>
+        <div style="font-size:11px;color:var(--text2)">${m.kana||'—'}</div>
+      </td>
+      <td style="text-align:center"><span class="badge b-info" style="font-size:10px">${m.grade||'—'}</span></td>
+      <td style="font-size:12px">${m.cls||'—'}</td>
+      <td style="font-size:11px">${m.schedule||'—'}</td>
+      <td style="text-align:center;font-weight:600;color:var(--blue)">${m.count||'—'}</td>
+      <td style="font-size:11px;white-space:nowrap">${m.time||'—'}</td>
+      <td style="white-space:nowrap">${m.fee ? Number(m.fee).toLocaleString()+'円' : '—'}</td>
+      <td style="font-size:12px">${m.tel||'—'}</td>
+      <td style="font-size:12px;white-space:nowrap">${m.joinDate||'—'}</td>
+      <td>
+        <span class="badge ${m.status==='active'?'b-on':m.status==='ticket'?'b-ticket':'b-off'}">
+          ${m.status==='active'?'在籍中':m.status==='ticket'?'チケット':'退会済'}
+        </span>
+      </td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-sm" onclick="openEdit(${m.id})" style="margin-right:3px">編集</button>
+        ${m.status!=='inactive' ? `<button class="btn btn-sm btn-r" onclick="openLeave(${m.id})">退会</button>` : ''}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:24px">該当する生徒がいません</td></tr>';
+}
+
+// ===== 退会予定 =====
+function renderLP() {
+  document.getElementById('lpt').innerHTML = leaveRequests.map((r,i) => `
+    <tr style="${!r.done ? 'background:var(--amber-bg)' : ''}">
+      <td style="font-size:12px;white-space:nowrap">${r.date}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td><span class="badge ${r.type.includes('チケット')?'b-ticket':r.done?'b-off':'b-info'}">${r.type}</span></td>
+      <td style="font-size:12px">${r.month}</td>
+      <td style="font-size:12px;color:var(--text2)">${r.reason}</td>
+      <td>${r.done
+        ? '<span style="font-size:11px;color:var(--text3)">✓ 処理済</span>'
+        : `<button class="btn btn-sm btn-r" onclick="markDone(${i})">処理済にする</button>`
+      }</td>
+    </tr>`).join('');
+}
+
+function markDone(i) {
+  leaveRequests[i].done = true;
+  const r = leaveRequests[i];
+  history.push({date: r.date.replace(/\//g,'-'), name: r.name, action: r.type, note: r.month + ' / ' + r.reason});
+  renderLP();
+  document.getElementById('lp-n').textContent = leaveRequests.filter(x=>!x.done).length || '';
+}
+
+function openAddLP() { document.getElementById('lpd').value = new Date().toISOString().slice(0,10); document.getElementById('lpo').classList.add('open'); }
+function saveLP() {
+  const name = document.getElementById('lpn').value.trim();
+  if(!name) { alert('氏名を入力してください'); return; }
+  leaveRequests.unshift({
+    date: document.getElementById('lpd').value.replace(/-/g,'/'),
+    name,
+    type: document.getElementById('lpt2').value,
+    month: document.getElementById('lpm').value,
+    reason: document.getElementById('lpr').value,
+    done: false
+  });
+  document.getElementById('lpo').classList.remove('open');
+  ['lpn','lpm','lpr'].forEach(id => document.getElementById(id).value = '');
+  renderLP();
+  document.getElementById('lp-n').textContent = leaveRequests.filter(x=>!x.done).length || '';
+}
+
+// ===== カレンダー =====
+function renderCal() {
+  document.getElementById('ct').textContent = calY + '年' + calM + '月';
+  const first = new Date(calY, calM-1, 1).getDay();
+  const days = new Date(calY, calM, 0).getDate();
+  let h = DAY_NAMES.map(d => `<div class="ch">${d}</div>`).join('');
+  for(let i=0; i<first; i++) h += '<div class="cd emp"></div>';
+  for(let d=1; d<=days; d++) {
+    const ds = `${calY}-${String(calM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasData = attendance[ds] && Object.keys(attendance[ds]).length > 0;
+    h += `<div class="cd${hasData?' hc':''}${ds===selD?' sel':''}" onclick="selDay('${ds}')">${d}</div>`;
+  }
+  document.getElementById('cg').innerHTML = h;
+}
+
+function prevM() { calM--; if(calM<1){calM=12;calY--;} renderCal(); }
+function nextM() { calM++; if(calM>12){calM=1;calY++;} renderCal(); }
+
+// ===== 時間割マスター =====
+const SCHEDULE_MASTER = {
+  '月': [
+    {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
+    {cls:'幼児',         time:'15:10〜16:00', cap:6,  bg:'#fffde7'},
+    {cls:'小学生',       time:'15:35〜16:50', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:6,  bg:'#fffde7'},
+    {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
+    {cls:'イラスト',     time:'17:00〜18:30', cap:4,  bg:'#fce4ec'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:15, bg:'#fffde7'},
+  ],
+  '火': [
+    {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
+    {cls:'幼児',         time:'15:45〜16:35', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:6,  bg:'#fffde7'},
+    {cls:'イラスト',     time:'17:00〜18:30', cap:4,  bg:'#fce4ec'},
+    {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:12, bg:'#fffde7'},
+  ],
+  '水': [
+    {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
+    {cls:'小学生',       time:'15:35〜16:50', cap:6,  bg:'#fffde7'},
+    {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
+    {cls:'建築造形',     time:'17:00〜18:30', cap:4,  bg:'#e3f2fd'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:8,  bg:'#fffde7'},
+  ],
+  '木': [
+    {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
+    {cls:'小学生',       time:'15:35〜16:50', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:4,  bg:'#fffde7'},
+    {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
+    {cls:'工芸デザイン', time:'17:00〜18:30', cap:4,  bg:'#e8f5e9'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:12, bg:'#fffde7'},
+  ],
+  '金': [
+    {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
+    {cls:'幼児',         time:'15:10〜16:00', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:6,  bg:'#fffde7'},
+    {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
+    {cls:'イラスト',     time:'17:00〜18:30', cap:4,  bg:'#fce4ec'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:12, bg:'#fffde7'},
+  ],
+  '土': [
+    {cls:'幼児',         time:'10:00〜10:50', cap:6,  bg:'#fffde7'},
+    {cls:'小学生',       time:'10:00〜11:15', cap:12, bg:'#fffde7'},
+    {cls:'小学生',       time:'11:00〜12:15', cap:16, bg:'#fffde7'},
+    {cls:'工芸デザイン', time:'13:00〜14:30', cap:8,  bg:'#e8f5e9'},
+    {cls:'建築造形',     time:'13:00〜14:30', cap:8,  bg:'#e3f2fd'},
+    {cls:'小学生',       time:'13:00〜14:15', cap:8,  bg:'#fffde7'},
+    {cls:'幼児',         time:'14:30〜15:20', cap:6,  bg:'#fffde7'},
+    {cls:'イラスト',     time:'15:00〜16:30', cap:8,  bg:'#fce4ec'},
+    {cls:'小学生',       time:'15:30〜16:45', cap:8,  bg:'#fffde7'},
+  ],
+  '日': [
+    {cls:'幼児',         time:'10:00〜10:50', cap:4,  bg:'#fffde7'},
+    {cls:'Jr.',          time:'10:00〜12:00', cap:10, bg:'#e3f2fd'},
+    {cls:'小学生',       time:'11:00〜12:15', cap:4,  bg:'#fffde7'},
+    {cls:'絵画専門',     time:'13:00〜14:30', cap:8,  bg:'#fffde7'},
+    {cls:'小学生',       time:'13:00〜14:15', cap:6,  bg:'#fffde7'},
+    {cls:'Jr.',          time:'15:00〜17:00', cap:6,  bg:'#e3f2fd'},
+    {cls:'小学生',       time:'15:30〜16:45', cap:6,  bg:'#fffde7'},
+  ],
+};
+
+// scheduleテキストから曜日・週番号を解析
+function parseSchedule(scheduleText) {
+  // 例: "第1,3土曜" "毎週月曜" "第2,4日曜 / 第1,3土曜"
+  const results = [];
+  const parts = scheduleText.split('/').map(s => s.trim());
+  parts.forEach(part => {
+    const dowMatch = part.match(/[月火水木金土日]/g);
+    if(!dowMatch) return;
+    const dow = dowMatch[0];
+    if(part.includes('毎週')) {
+      results.push({dow, weeks:[1,2,3,4,5]});
+    } else {
+      const numMatch = part.match(/第([\d,]+)/);
+      if(numMatch) {
+        const weeks = numMatch[1].split(',').map(Number);
+        results.push({dow, weeks});
+      } else {
+        results.push({dow, weeks:[1,2,3,4,5]});
+      }
+    }
+  });
+  return results;
+}
+
+// 指定日に登校する生徒を返す
+function getStudentsForDay(ds) {
+  const d = new Date(ds);
+  const dow = DAY_NAMES[d.getDay()];
+  const week = getWeekOfMonth(ds);
+  const actives = members.filter(m => m.status==='active' || m.status==='ticket');
+  return actives.filter(m => {
+    const parsed = parseSchedule(m.schedule || '');
+    return parsed.some(p => p.dow === dow && p.weeks.includes(week));
+  });
+}
+
+function getWeekOfMonth(ds) {
+  const d = new Date(ds);
+  const dow = d.getDay();
+  let count = 0;
+  for(let i=1; i<=d.getDate(); i++) {
+    if(new Date(d.getFullYear(), d.getMonth(), i).getDay() === dow) count++;
+  }
+  return count;
+}
+
+function getTimeStart(timeStr) {
+  const m = timeStr.match(/(\d+):(\d+)/);
+  return m ? parseInt(m[1])*60+parseInt(m[2]) : 0;
+}
+
+function selDay(ds) {
+  selD = ds;
+  renderCal();
+  if(!attendance[ds]) attendance[ds] = {};
+  const [y,mo,d] = ds.split('-');
+  const dow = DAY_NAMES[new Date(ds).getDay()];
+  const week = getWeekOfMonth(ds);
+  const rec = attendance[ds];
+  const isWE = new Date(ds).getDay()===0 || new Date(ds).getDay()===6;
+
+  // 29日以降はクラスなし → 出勤者欄のみ表示
+  if(parseInt(d) >= 29) {
+    const weekLabel2 = WEEK_LABELS[week-1]||'';
+    const staffBtns2 = STAFF_LIST.map(s => {
+      const hrs = STAFF_HOURS[s];
+      const t = hrs ? (isWE ? hrs.weekend : hrs.weekday) : '';
+      return `<button onclick="quickStaff('${ds}','${s}')" style="padding:2px 7px;border:1px solid #ccc;border-radius:8px;background:#fff;font-size:11px;cursor:pointer;margin:1px">${s}<span style="font-size:9px;color:#aaa;margin-left:2px">${t}</span></button>`;
+    }).join('');
+    function staffCell2(ds2, n2, rec2) {
+      return `<td style="width:120px;padding:1px 5px;border-bottom:1px solid #eee;border-right:1px solid #eee">
+        <input id="sn${ds2}_${n2}" list="staff-dl" placeholder="氏名" style="border:none;background:transparent;font-size:11px;outline:none;width:100%" value="${rec2['_sname'+n2]||''}" oninput="if(!attendance['${ds2}'])attendance['${ds2}']={};attendance['${ds2}']['_sname${n2}']=this.value">
+      </td>
+      <td style="width:48px;padding:1px 3px;border-bottom:1px solid #eee;border-right:1px solid #eee">
+        <input id="ss${ds2}_${n2}" placeholder="9:30" style="border:none;background:transparent;font-size:11px;outline:none;width:100%;text-align:center" value="${rec2['_sstart'+n2]||''}" oninput="if(!attendance['${ds2}'])attendance['${ds2}']={};attendance['${ds2}']['_sstart${n2}']=this.value">
+      </td>
+      <td style="width:10px;text-align:center;color:#aaa;font-size:10px">〜</td>
+      <td style="width:48px;padding:1px 3px;border-bottom:1px solid #eee;border-right:1px solid #eee">
+        <input id="se${ds2}_${n2}" placeholder="17:30" style="border:none;background:transparent;font-size:11px;outline:none;width:100%;text-align:center" value="${rec2['_send'+n2]||''}" oninput="if(!attendance['${ds2}'])attendance['${ds2}']={};attendance['${ds2}']['_send${n2}']=this.value">
+      </td>`;
+    }
+    const staffTable2 = `<table style="width:100%;border-collapse:collapse;font-size:11px">
+      <tbody>
+        ${[[1,5],[2,6],[3,7],[4,8]].map(([a,b],i) => `<tr>
+          ${i===0?`<td rowspan="4" style="width:42px;text-align:center;font-size:10px;font-weight:700;border-right:1px solid #ccc;background:#f5f5f5;vertical-align:middle;padding:2px">出勤者</td>`:''}
+          ${staffCell2(ds, a, rec)}
+          <td style="width:8px;border-bottom:1px solid #eee;border-right:1px solid #eee;background:#f5f5f5"></td>
+          ${staffCell2(ds, b, rec)}
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+    document.getElementById('daily-sheet').innerHTML = `
+      <div style="background:#fff;border:1px solid #ccc;border-radius:8px;overflow:hidden">
+        <div style="background:#555;color:#fff;padding:6px 12px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <span style="font-size:22px;font-weight:900">${weekLabel2}${dow}曜　${y}年${mo}月${d}日（${dow}）</span>
+            <span style="font-size:11px;opacity:.8;margin-left:10px">29日以降：クラスなし</span>
+          </div>
+        </div>
+        <div style="padding:10px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;flex-wrap:wrap">
+            <span style="font-weight:700">出勤者候補：</span>${staffBtns2}
+          </div>
+          ${staffTable2}
+        </div>
+      </div>`;
+    return;
+  }
+
+  // その日の生徒を取得
+  const todayStudents = getStudentsForDay(ds);
+
+  // 時間割スロット
+  const slots = SCHEDULE_MASTER[dow] || [];
+
+  // 出勤者欄HTML（2列×4行=8名）
+  function staffCell(ds, n, rec) {
+    return `<td style="width:120px;padding:1px 5px;border-bottom:1px solid #eee;border-right:1px solid #eee">
+      <input id="sn${ds}_${n}" list="staff-dl" placeholder="氏名" style="border:none;background:transparent;font-size:11px;outline:none;width:100%" value="${rec['_sname'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_sname${n}']=this.value">
+    </td>
+    <td style="width:48px;padding:1px 3px;border-bottom:1px solid #eee;border-right:1px solid #eee">
+      <input id="ss${ds}_${n}" placeholder="9:30" style="border:none;background:transparent;font-size:11px;outline:none;width:100%;text-align:center" value="${rec['_sstart'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_sstart${n}']=this.value">
+    </td>
+    <td style="width:10px;text-align:center;color:#aaa;font-size:10px">〜</td>
+    <td style="width:48px;padding:1px 3px;border-bottom:1px solid #eee;border-right:1px solid #eee">
+      <input id="se${ds}_${n}" placeholder="17:30" style="border:none;background:transparent;font-size:11px;outline:none;width:100%;text-align:center" value="${rec['_send'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_send${n}']=this.value">
+    </td>`;
+  }
+  const staffHtml = `
+  <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:0">
+    <tbody>
+      ${[[1,5],[2,6],[3,7],[4,8]].map(([a,b],i) => `<tr>
+        ${i===0?`<td rowspan="4" style="width:42px;text-align:center;font-size:10px;font-weight:700;border-right:1px solid #ccc;background:#f5f5f5;vertical-align:middle;padding:2px">出勤者</td>`:''}
+        ${staffCell(ds, a, rec)}
+        <td style="width:8px;border-bottom:1px solid #eee;border-right:1px solid #eee;background:#f5f5f5"></td>
+        ${staffCell(ds, b, rec)}
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  // 各スロットの生徒を時間・クラスでマッチング
+  function matchStudents(slot) {
+    const slotStartMin = getTimeStart(slot.time);
+    return todayStudents.filter(m => {
+      const schParts = (m.schedule||'').split('/').map(s => s.trim());
+      const clsParts = (m.cls||'').split('/').map(c => c.trim());
+      const timeParts = (m.time||'').split('/').map(t => t.trim());
+      let matched = false;
+      schParts.forEach((part, i) => {
+        // このpartが今日（曜日・週）に該当するか
+        const dowM = part.match(/[月火水木金土日]/);
+        if(!dowM || dowM[0] !== dow) return;
+        if(!part.includes('毎週')) {
+          const nm = part.match(/第([\d,]+)/);
+          if(nm) {
+            const weeks = nm[1].split(',').map(Number);
+            if(!weeks.includes(week)) return;
+          }
+        }
+        const cls  = clsParts[i] || clsParts[clsParts.length-1];
+        const time = timeParts[i] || timeParts[timeParts.length-1];
+        const clsOk = cls === slot.cls || (slot.cls==='個別アトリエ' && cls==='個別');
+        if(!clsOk) return;
+        const tm = getTimeStart(time);
+        if(Math.abs(tm - slotStartMin) <= 45) matched = true;
+      });
+      return matched;
+    });
+  }
+
+  // ===== 写真形式のスロットテーブル生成 =====
+  function buildSlotTable(slot) {
+    const matched = matchStudents(slot);
+    const cap     = slot.cap;
+    const half    = Math.ceil(cap / 2);
+    const isKojin = slot.cls === '個別アトリエ';
+
+    function makeRow(n, mx) {
+      const st  = mx ? (rec[mx.id]||'') : '';
+      const chk = st==='present' ? '○' : st==='absent' ? '×' : '';
+      const chkColor = st==='present' ? 'color:#2d7a4f' : st==='absent' ? 'color:#c0392b' : 'color:#ccc';
+      const rowBg = st==='present' ? 'background:#f0fbf4' : st==='absent' ? 'background:#fff0f0' : '';
+      const timeInfo = isKojin && mx ? `<div style="font-size:8px;color:#1a5fa8;margin-top:1px">${mx.time||''}</div>` : '';
+
+      return `<tr style="height:46px;${rowBg}">
+        <td style="width:20px;border:1px solid #ccc;text-align:center;font-size:10px;font-weight:700;background:#f7f7f7;vertical-align:middle">${n}</td>
+        <td style="border:1px solid #ccc;padding:3px 5px;vertical-align:top;${rowBg}">
+          ${mx ? `
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:1px">
+              <button onclick="togA('${ds}',${mx.id})" style="width:18px;height:18px;border-radius:50%;border:1.5px solid ${st==='present'?'#2d7a4f':st==='absent'?'#c0392b':'#ccc'};background:${st==='present'?'#edf7f1':st==='absent'?'#fdf0ef':'transparent'};cursor:pointer;font-size:10px;${chkColor};flex-shrink:0;padding:0;line-height:1">${chk}</button>
+              <span style="font-size:12px;font-weight:700">${mx.name}</span>
+            </div>
+            <div style="font-size:8px;color:#999;padding-left:22px;line-height:1.2">${mx.kana||''}</div>
+            ${timeInfo}
+          ` : ''}
+        </td>
+        <td style="width:22px;border:1px solid #ccc;text-align:center;vertical-align:middle;font-size:9px;padding:1px">
+          ${mx ? `<span style="font-size:9px;color:#444">${mx.grade||'—'}</span>` : '<span style="color:#ccc;font-size:9px">—</span>'}
+        </td>
+        <td style="width:20px;border:1px solid #ccc;text-align:center;vertical-align:middle;padding:1px">
+          <button onclick="togBox('${ds}','vib_${slot.time}_'+${n})" style="width:16px;height:16px;border:1.5px solid #999;border-radius:2px;background:#fff;cursor:pointer;font-size:11px;line-height:1;padding:0;color:#1a5fa8;font-weight:700">${rec['vib_'+slot.time+'_'+n]?'☑':''}</button>
+        </td>
+        <td style="width:20px;border:1px solid #ccc;text-align:center;vertical-align:middle;padding:1px">
+          <button onclick="togBox('${ds}','tai_${slot.time}_'+${n})" style="width:16px;height:16px;border:1.5px solid #999;border-radius:2px;background:#fff;cursor:pointer;font-size:11px;line-height:1;padding:0;color:#1a5fa8;font-weight:700">${rec['tai_'+slot.time+'_'+n]?'☑':''}</button>
+        </td>
+        ${isKojin ? '' : `<td style="width:20px;border:1px solid #ccc;text-align:center;vertical-align:middle;padding:1px">
+          <button onclick="togBox('${ds}','tkt_${slot.time}_'+${n})" style="width:16px;height:16px;border:1.5px solid #999;border-radius:2px;background:#fff;cursor:pointer;font-size:11px;line-height:1;padding:0;color:#1a5fa8;font-weight:700">${rec['tkt_'+slot.time+'_'+n]?'☑':''}</button>
+        </td>`}
+        <td style="border:1px solid #ccc;padding:1px 4px;vertical-align:middle">
+          <input style="border:none;width:100%;font-size:10px;outline:none;background:transparent" value="${rec['memo_'+slot.time+'_'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['memo_${slot.time}_${n}']=this.value">
+        </td>
+      </tr>`;
+    }
+
+    const thS = 'border:1px solid #ccc;padding:2px 2px;text-align:center;font-size:9px;background:#f0f0f0;font-weight:700';
+    const cols = isKojin ? 6 : 7;
+
+    // 左テーブル（1〜half）と右テーブル（half+1〜cap）を横並び
+    let leftRows = '', rightRows = '';
+    for(let i=0; i<half; i++) {
+      leftRows  += makeRow(i+1,      matched[i]||null);
+      rightRows += makeRow(i+half+1, matched[i+half]||null);
+    }
+
+    const tableStyle = 'width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px';
+    const colgroup = `<colgroup>
+      <col style="width:20px"><col><col style="width:22px">
+      <col style="width:20px"><col style="width:20px">
+      ${isKojin ? '' : '<col style="width:20px">'}
+      <col>
+    </colgroup>`;
+    const thead = `<thead><tr>
+      <th style="${thS}">No</th>
+      <th style="${thS};text-align:left;padding-left:4px">氏名</th>
+      <th style="${thS}">学年</th>
+      <th style="${thS};color:#1a5fa8">振替</th>
+      <th style="${thS};color:#1a5fa8">体験</th>
+      ${isKojin ? '' : `<th style="${thS};color:#1a5fa8">チケ<br>ット</th>`}
+      <th style="${thS}">メモ</th>
+    </tr></thead>`;
+
+    return `<div style="margin-bottom:4px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:2px 4px;border-left:3px solid ${slot.bg==='#fce4ec'?'#e91e8c':slot.bg==='#e3f2fd'?'#1a5fa8':slot.bg==='#e8f5e9'?'#2d7a4f':slot.bg==='#c8e6c9'?'#388e3c':'#888'};margin-bottom:1px">
+        <span style="font-size:12px;font-weight:700">${slot.cls}　<span style="font-size:10px;font-weight:400;color:#555">${slot.time}</span></span>
+        <span style="font-size:10px;color:#888">定員${cap}名</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+        <table style="${tableStyle}">${colgroup}${thead}<tbody>${leftRows}</tbody></table>
+        <table style="${tableStyle}">${colgroup}${thead}<tbody>${rightRows}</tbody></table>
+      </div>
+    </div>`;
+  }
+
+  // 出勤者テーブル（inputにIDを付けてquickStaffと連動）
+  function staffInputCell(n) {
+    return `<td style="border:1px solid #ccc;padding:1px 4px;min-width:90px">
+        <input id="sn${ds}_${n}" list="staff-dl" placeholder="氏名" style="border:none;background:transparent;font-size:11px;outline:none;width:100%" value="${rec['_sname'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_sname${n}']=this.value">
+      </td>
+      <td style="border:1px solid #ccc;padding:1px 4px;min-width:45px">
+        <input id="ss${ds}_${n}" placeholder="9:30" style="border:none;background:transparent;font-size:11px;outline:none;width:100%;text-align:center" value="${rec['_sstart'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_sstart${n}']=this.value">
+      </td>
+      <td style="border:1px solid #ccc;padding:1px 3px;color:#aaa;font-size:10px;text-align:center">〜</td>
+      <td style="border:1px solid #ccc;padding:1px 4px;min-width:45px">
+        <input id="se${ds}_${n}" placeholder="17:30" style="border:none;background:transparent;font-size:11px;outline:none;width:100%;text-align:center" value="${rec['_send'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_send${n}']=this.value">
+      </td>
+      <td style="border:1px solid #ccc;padding:1px 4px;min-width:70px">
+        <input placeholder="備考" style="border:none;background:transparent;font-size:10px;outline:none;width:100%" value="${rec['_smemo'+n]||''}" oninput="if(!attendance['${ds}'])attendance['${ds}']={};attendance['${ds}']['_smemo${n}']=this.value">
+      </td>`;
+  }
+  const staffTable = `<table style="border-collapse:collapse;font-size:11px;margin-bottom:4px;width:100%">
+    <tbody>
+      ${[[1,5],[2,6],[3,7],[4,8]].map(([a,b],i) => `<tr>
+        ${i===0 ? '<td rowspan="4" style="border:1px solid #ccc;padding:2px 6px;background:#f5f5f5;vertical-align:middle;font-size:10px;font-weight:700;writing-mode:vertical-lr;text-align:center;width:24px">出勤者</td>' : ''}
+        ${staffInputCell(a)}
+        <td style="width:12px;background:#e8e8e8;border:1px solid #ccc"></td>
+        ${staffInputCell(b)}
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  // 出勤者候補ボタン
+  const staffBtns = STAFF_LIST.map(s => {
+    const hrs = STAFF_HOURS[s];
+    const t = hrs ? (isWE ? hrs.weekend : hrs.weekday) : '';
+    return `<button onclick="quickStaff('${ds}','${s}')" style="padding:2px 7px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;font-size:10px;cursor:pointer;margin:1px">${s}<span style="font-size:8px;color:#aaa;margin-left:2px">${t}</span></button>`;
+  }).join('');
+
+  const weekLabel = WEEK_LABELS[week-1]||'';
+  const slotsHtml = slots.map(s => buildSlotTable(s)).join('');
+
+  const html = `<div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif">
+    <!-- 日付ヘッダー -->
+    <div style="padding:8px 12px;border-bottom:2px solid #333;display:flex;align-items:flex-end;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;color:#888;margin-bottom:2px">Cosmic art Mira</div>
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <span style="font-size:48px;font-weight:900;line-height:1;letter-spacing:-2px">${d}日</span>
+          <span style="font-size:26px;font-weight:700">（${dow}）</span>
+          <span style="font-size:16px;font-weight:700;color:#444;margin-left:4px">${weekLabel}${dow}曜日</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#666;margin-bottom:4px">${y}年${mo}月</div>
+        <button class="btn btn-sm btn-p" onclick="printDay('${ds}')" style="font-size:11px">🖨️ 印刷</button>
+      </div>
+    </div>
+    <!-- 出勤者 -->
+    <div style="padding:6px 10px;border-bottom:1px solid #eee;background:#fafafa">
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap">
+        <span style="font-size:10px;font-weight:700;color:#666">出勤者候補：</span>${staffBtns}
+      </div>
+      ${staffTable}
+    </div>
+    <!-- クラス一覧 -->
+    <div style="padding:6px 8px">${slotsHtml}</div>
+  </div>`;
+
+  document.getElementById('daily-sheet').innerHTML = html;
+}
+
+function togBox(ds, key) {
+  if(!attendance[ds]) attendance[ds] = {};
+  attendance[ds][key] = attendance[ds][key] ? 0 : 1;
+  selDay(ds);
+}
+
+function togA(ds, id) {
+  if(!attendance[ds]) attendance[ds] = {};
+  const c = attendance[ds][id] || '';
+  if(!c) attendance[ds][id] = 'present';
+  else if(c==='present') attendance[ds][id] = 'absent';
+  else delete attendance[ds][id];
+  selDay(ds);
+  renderCal();
+}
+
+// ===== 月別まとめ =====
+function renderMo() {
+  const sel = document.getElementById('msel');
+  if(!sel.options.length) {
+    const now = new Date();
+    const cur = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    for(let i=3; i>=-3; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const v = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = v.replace('-','年') + '月';
+      sel.appendChild(o);
+    }
+    sel.value = cur;
+  }
+  const ym = sel.value;
+  const cds = Object.keys(attendance).filter(d => d.startsWith(ym));
+  const act = members.filter(m => m.status==='active' || m.status==='ticket');
+  const rev = members.filter(m => m.status==='active').reduce((s,m) => s+(Number(m.fee)||0), 0);
+
+  document.getElementById('most').innerHTML = `
+    <div class="stat"><div class="stat-n">${cds.length}</div><div class="stat-l">記録日数</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--green)">${act.length}</div><div class="stat-l">在籍人数</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--blue)">—</div><div class="stat-l">平均出席率</div></div>
+    <div class="stat"><div class="stat-n">${rev.toLocaleString()}</div><div class="stat-l">月謝合計（円）</div></div>`;
+
+  document.getElementById('mob').innerHTML = act.map(m => {
+    const p = cds.filter(d => attendance[d][m.id]==='present').length;
+    const a = cds.filter(d => attendance[d][m.id]==='absent').length;
+    const rate = cds.length > 0 ? Math.round(p/cds.length*100) : null;
+    return `<tr>
+      <td><div style="font-weight:600">${m.name}</div><div style="font-size:11px;color:var(--text2)">${m.kana||''}</div></td>
+      <td style="font-size:12px">${m.cls||'—'}</td>
+      <td>${cds.length}回</td>
+      <td style="color:var(--green);font-weight:600">${p}回</td>
+      <td style="color:var(--red)">${a}回</td>
+      <td style="color:var(--text3)">${cds.length-p-a}回</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="prog"><div class="pbar" style="width:${rate||0}%"></div></div>
+        <span style="font-size:12px;min-width:35px;text-align:right">${rate!==null?rate+'%':'—'}</span>
+      </div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">データなし</td></tr>';
+}
+
+// ===== 履歴 =====
+function renderH() {
+  document.getElementById('hb').innerHTML = [...history].reverse().map(h => `
+    <tr>
+      <td style="font-size:12px;white-space:nowrap">${h.date}</td>
+      <td style="font-weight:600">${h.name}</td>
+      <td><span class="badge ${h.action==='入会'?'b-on':h.action.includes('チケット')?'b-ticket':'b-off'}">${h.action}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${h.note||'—'}</td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px">履歴なし</td></tr>';
+}
+
+// ===== 生徒追加・編集 =====
+function openAdd() {
+  editId = null;
+  document.getElementById('ao-title').textContent = '＋ 生徒を追加';
+  document.getElementById('aj').value = new Date().toISOString().slice(0,10);
+  ['an','ak','ag','af','at','acls','asch','atm','acnt','anote'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('ao-status-btns').style.display = 'none';
+  document.getElementById('ao').classList.add('open');
+}
+
+function openEdit(id) {
+  editId = id;
+  const m = members.find(x => x.id===id);
+  document.getElementById('ao-title').textContent = '✏️ ' + m.name + ' を編集';
+  document.getElementById('an').value = m.name;
+  document.getElementById('ak').value = m.kana||'';
+  document.getElementById('ag').value = m.grade||'';
+  document.getElementById('af').value = m.fee||'';
+  document.getElementById('at').value = m.tel||'';
+  document.getElementById('acls').value = m.cls||'';
+  document.getElementById('asch').value = m.schedule||'';
+  document.getElementById('atm').value = m.time||'';
+  document.getElementById('acnt').value = m.count||'';
+  document.getElementById('aj').value = m.joinDate||'';
+  document.getElementById('anote').value = m.note||'';
+  // 状態ボタンの表示・ハイライト
+  const sb = document.getElementById('ao-status-btns');
+  sb.style.display = 'flex';
+  const statusColors = {active:'#2d7a4f', ticket:'#6b3fa0'};
+  ['active','ticket'].forEach(s => {
+    const btn = document.getElementById('btn-' + s);
+    btn.style.background = m.status === s ? (s==='active'?'#edf7f1':'#f3eefb') : '';
+    btn.style.borderColor = m.status === s ? (statusColors[s]) : '';
+    btn.style.color = m.status === s ? (statusColors[s]) : '';
+    btn.style.fontWeight = m.status === s ? '700' : '400';
+  });
+  document.getElementById('btn-leave').style.display = m.status === 'inactive' ? 'none' : '';
+  document.getElementById('ao').classList.add('open');
+}
+
+function closeAdd() { document.getElementById('ao').classList.remove('open'); }
+
+function setStatus(s) {
+  if(!editId) return;
+  const m = members.find(x => x.id===editId);
+  const old = m.status;
+  m.status = s;
+  if(old !== s) history.push({date: new Date().toISOString().slice(0,10), name: m.name, action: s==='ticket'?'チケット制移行':'在籍に戻す', note: ''});
+  // ボタン再描画
+  ['active','ticket'].forEach(st => {
+    const btn = document.getElementById('btn-' + st);
+    const statusColors = {active:'#2d7a4f', ticket:'#6b3fa0'};
+    btn.style.background = s === st ? (st==='active'?'#edf7f1':'#f3eefb') : '';
+    btn.style.borderColor = s === st ? (statusColors[st]) : '';
+    btn.style.color = s === st ? (statusColors[st]) : '';
+    btn.style.fontWeight = s === st ? '700' : '400';
+  });
+  renderM();
+}
+
+function triggerLeave() {
+  closeAdd();
+  openLeave(editId);
+}
+
+function saveM() {
+  const name = document.getElementById('an').value.trim();
+  if(!name) { alert('氏名は必須です'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  if(editId) {
+    const m = members.find(x => x.id===editId);
+    const changes = [];
+    const fields = {
+      name: ['an', '氏名'], kana: ['ak', 'ふりがな'], grade: ['ag', '学年'],
+      fee: ['af', '月謝'], tel: ['at', '電話'], cls: ['acls', 'クラス'],
+      schedule: ['asch', '日程'], time: ['atm', '時間'],
+      count: ['acnt', '月回'], joinDate: ['aj', '入会日'], note: ['anote', '備考']
+    };
+    Object.entries(fields).forEach(([key, [elId, label]]) => {
+      const val = document.getElementById(elId).value.trim();
+      if(String(m[key]||'') !== val) {
+        changes.push(label + ': ' + (m[key]||'—') + '→' + (val||'—'));
+        m[key] = val;
+      }
+    });
+    if(changes.length) history.push({date: today, name, action: '情報更新', note: changes.join(' / ')});
+  } else {
+    const join = document.getElementById('aj').value || today;
+    const m = {
+      id: nextId++, status: 'active',
+      name,
+      kana:     document.getElementById('ak').value.trim(),
+      grade:    document.getElementById('ag').value.trim(),
+      fee:      document.getElementById('af').value.trim(),
+      tel:      document.getElementById('at').value.trim(),
+      cls:      document.getElementById('acls').value.trim(),
+      schedule: document.getElementById('asch').value.trim(),
+      time:     document.getElementById('atm').value.trim(),
+      count:    document.getElementById('acnt').value.trim(),
+      joinDate: join,
+      note:     document.getElementById('anote').value.trim(),
+    };
+    members.push(m);
+    history.push({date: join, name, action: '入会', note: m.cls + ' ' + m.schedule});
+  }
+  closeAdd();
+  renderM();
+}
+
+// ===== 退会処理 =====
+function openLeave(id) {
+  lvId = id;
+  const m = members.find(x => x.id===id);
+  document.getElementById('lt').textContent = '退会処理：' + m.name;
+  document.getElementById('ld').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ln').value = '';
+  document.getElementById('lo').classList.add('open');
+}
+function closeLeave() { document.getElementById('lo').classList.remove('open'); }
+function confLeave() {
+  const m = members.find(x => x.id===lvId);
+  const date = document.getElementById('ld').value;
+  const note = document.getElementById('ln').value;
+  m.status = 'inactive';
+  m.leaveDate = date;
+  history.push({date, name: m.name, action: '退会', note});
+  closeLeave();
+  renderM();
+}
+
+// ===== CSV出力 =====
+function exportCSV() {
+  const act = members.filter(m => m.status==='active' || m.status==='ticket');
+  const sorted = [...act].sort((a,b) => (a.kana||'').localeCompare(b.kana||'','ja'));
+  const rows = [
+    ['No','氏名','ふりがな','学年','受講日程','月回','時間','クラス','月謝','電話番号','入会日','状態'],
+    ...sorted.map((m,i) => [i+1, m.name, m.kana||'', m.grade||'', m.schedule||'', m.count||'', m.time||'', m.cls||'', m.fee||'', m.tel||'', m.joinDate||'', m.status==='active'?'在籍中':'チケット'])
+  ];
+  const now = new Date();
+  const bom = '\uFEFF';
+  const csv = bom + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `名簿_${now.getFullYear()}年${now.getMonth()+1}月.csv`;
+  a.click();
+}
+
+// ===== 印刷 =====
+function printDay(ds) {
+  const sheet = document.getElementById('daily-sheet');
+  if(!sheet || !ds) return;
+  const [y,mo,d] = ds.split('-');
+  const dow = DAY_NAMES[new Date(ds).getDay()];
+  const week = getWeekOfMonth(ds);
+  const wl = WEEK_LABELS[week-1]||'';
+  const title = `Cosmic art Mira　${y}年${mo}月${d}日（${dow}）${wl}${dow}曜`;
+  // 印刷用iframeを使う（ポップアップブロック回避）
+  let iframe = document.getElementById('print-iframe');
+  if(!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'print-iframe';
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none';
+    document.body.appendChild(iframe);
+  }
+  const iDoc = iframe.contentDocument || iframe.contentWindow.document;
+  iDoc.open();
+  iDoc.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>${title}</title>
+    <style>
+      *{box-sizing:border-box}
+      body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;font-size:9px;padding:4px;margin:0}
+      table{width:100%;border-collapse:collapse;table-layout:fixed}
+      td,th{border:1px solid #ccc;font-size:8px!important;padding:0 2px!important;line-height:1.2}
+      th{background:#eee;font-weight:700;text-align:center}
+      button{display:none!important}
+      input{border:none;background:transparent;font-size:8px;width:100%}
+      tr{height:16px!important;max-height:16px!important}
+      div[style*="font-size:12px"]{font-size:9px!important}
+      div[style*="font-size:11px"]{font-size:9px!important}
+      div[style*="font-size:10px"]{font-size:8px!important}
+      div[style*="font-size:8px"]{font-size:7px!important}
+      div[style*="margin-bottom:1px"]{margin-bottom:0!important}
+      div[style*="padding-left:22px"]{padding-left:14px!important}
+      div[style*="gap:4px"]{gap:2px!important}
+      span[style*="font-size:12px"]{font-size:9px!important}
+      span[style*="font-size:11px"]{font-size:9px!important}
+      span[style*="font-size:40px"]{font-size:20px!important}
+      span[style*="font-size:26px"]{font-size:14px!important}
+      span[style*="font-size:16px"]{font-size:11px!important}
+      span[style*="font-size:48px"]{font-size:22px!important}
+      div[style*="font-size:48px"]{font-size:22px!important}
+      div[style*="height:34px"]{height:16px!important;min-height:0!important}
+      div[style*="height:28px"]{height:16px!important;min-height:0!important}
+      div[style*="height:40px"]{height:16px!important;min-height:0!important}
+      div[style*="padding:6px 12px"]{padding:2px 6px!important}
+      div[style*="padding:8px"]{padding:3px!important}
+      div[style*="padding:6px 8px"]{padding:2px 4px!important}
+      div[style*="margin-bottom:4px"]{margin-bottom:1px!important}
+      div[style*="margin-bottom:3px"]{margin-bottom:1px!important}
+      div[style*="margin-bottom:2px"]{margin-bottom:1px!important}
+      @media print{@page{size:A4 portrait;margin:6mm 6mm 6mm 18mm}}
+    </style>
+  </head><body>${sheet.innerHTML}</body></html>`);
+  iDoc.close();
+  setTimeout(() => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  }, 300);
+}
+
+function printDaily() {
+  if(!selD) { alert('カレンダーから日付を選択してください'); return; }
+  printDay(selD);
+}
+
+function printMonthAll() {
+  const y = calY, m = calM;
+  const days = new Date(y, m, 0).getDate();
+  const pages = [];
+
+  // ===== スロットマッチング（クロージャ問題を避けるため外部関数として定義） =====
+  function buildDayPage(dd) {
+    const ds  = `${y}-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    const dow = DAY_NAMES[new Date(ds).getDay()];
+    const week = getWeekOfMonth(ds);
+    const wl   = WEEK_LABELS[week-1]||'';
+    const rec  = attendance[ds] || {};
+    const noClass = (dd >= 29);
+    const slots   = noClass ? [] : (SCHEDULE_MASTER[dow] || []);
+    if(slots.length === 0 && !noClass) return null;
+
+    // この日の生徒（ここで確定させる）
+    const dayStudents = getStudentsForDay(ds);
+
+    function doMatch(slot) {
+      const sMin = getTimeStart(slot.time);
+      const dsDow = DAY_NAMES[new Date(ds).getDay()];
+      const dsWeek = getWeekOfMonth(ds);
+      return dayStudents.filter(mx => {
+        const schParts = (mx.schedule||'').split('/').map(s => s.trim());
+        const clsParts = (mx.cls||'').split('/').map(c => c.trim());
+        const timeParts = (mx.time||'').split('/').map(t => t.trim());
+        for(let i=0; i<schParts.length; i++) {
+          const part = schParts[i];
+          const cls  = clsParts[i] !== undefined ? clsParts[i] : clsParts[clsParts.length-1];
+          const time = timeParts[i] !== undefined ? timeParts[i] : timeParts[timeParts.length-1];
+          // このschPartが今日（曜日・週）に該当するか確認
+          const dowMatch = part.match(/[月火水木金土日]/);
+          if(!dowMatch || dowMatch[0] !== dsDow) continue;
+          if(!part.includes('毎週')) {
+            const nm = part.match(/第([\d,]+)/);
+            if(nm) {
+              const weeks = nm[1].split(',').map(Number);
+              if(!weeks.includes(dsWeek)) continue;
+            }
+          }
+          const clsOk = cls === slot.cls || (slot.cls==='個別アトリエ' && cls==='個別');
+          if(!clsOk) continue;
+          const tm = getTimeStart(time);
+          if(Math.abs(tm - sMin) <= 45) return true;
+        }
+        return false;
+      });
+    }
+
+    // 出勤者テーブル
+    const staffRows = [[1,5],[2,6],[3,7],[4,8]].map(([a,b],i) => `<tr>
+      ${i===0?'<td rowspan="4" style="border:1px solid #ccc;padding:2px 4px;background:#f5f5f5;vertical-align:middle;font-size:9px;font-weight:700;writing-mode:vertical-lr;text-align:center;width:20px">出勤者</td>':''}
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px">${rec['_sname'+a]||''}</td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px;text-align:center;width:42px">${rec['_sstart'+a]||''}</td>
+      <td style="border:1px solid #ccc;color:#aaa;font-size:9px;text-align:center;width:10px">〜</td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px;text-align:center;width:42px">${rec['_send'+a]||''}</td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px">${rec['_smemo'+a]||''}</td>
+      <td style="width:10px;background:#e0e0e0;border:1px solid #ccc"></td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px">${rec['_sname'+b]||''}</td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px;text-align:center;width:42px">${rec['_sstart'+b]||''}</td>
+      <td style="border:1px solid #ccc;color:#aaa;font-size:9px;text-align:center;width:10px">〜</td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px;text-align:center;width:42px">${rec['_send'+b]||''}</td>
+      <td style="border:1px solid #ccc;padding:0 3px;font-size:9px">${rec['_smemo'+b]||''}</td>
+    </tr>`).join('');
+
+    function buildSlotHtml(slot) {
+      const matched = doMatch(slot);
+      const cap     = slot.cap;
+      const half    = Math.ceil(cap/2);
+      const isKojin = slot.cls === '個別アトリエ';
+      const present = matched.filter(mx => rec[mx.id]==='present').length;
+      const absent  = matched.filter(mx => rec[mx.id]==='absent').length;
+
+      function makeRowHtml(n, mx) {
+        const st  = mx ? (rec[mx.id]||'') : '';
+        const chk = st==='present'?'○':st==='absent'?'×':'';
+        const chkColor = st==='present'?'color:#2d7a4f':st==='absent'?'color:#c0392b':'color:#ccc';
+        const rowBg = st==='present'?'background:#f0fbf4':st==='absent'?'background:#fff0f0':'';
+        const timeInfo = isKojin && mx ? `<span style="font-size:7px;color:#1a5fa8;margin-left:3px">${mx.time||''}</span>` : '';
+        return `<tr style="height:16px;${rowBg}">
+          <td style="width:16px;border:1px solid #ccc;text-align:center;font-size:8px;font-weight:700;background:#f7f7f7;vertical-align:middle;padding:0">${n}</td>
+          <td style="border:1px solid #ccc;padding:0 3px;vertical-align:middle;${rowBg}">
+            ${mx ? `<span style="font-size:8px;${chkColor};font-weight:700;margin-right:2px">${chk}</span><span style="font-size:9px;font-weight:700">${mx.name}</span><span style="font-size:7px;color:#999;margin-left:2px">${mx.kana||''}</span>${timeInfo}` : ''}
+          </td>
+          <td style="width:18px;border:1px solid #ccc;text-align:center;font-size:8px;vertical-align:middle;padding:0">${mx?mx.grade||'—':''}</td>
+          <td style="width:16px;border:1px solid #ccc;text-align:center;font-size:9px;vertical-align:middle;padding:0">${rec['vib_'+slot.time+'_'+n]?'☑':'□'}</td>
+          <td style="width:16px;border:1px solid #ccc;text-align:center;font-size:9px;vertical-align:middle;padding:0">${rec['tai_'+slot.time+'_'+n]?'☑':'□'}</td>
+          ${isKojin?'':`<td style="width:16px;border:1px solid #ccc;text-align:center;font-size:9px;vertical-align:middle;padding:0">${rec['tkt_'+slot.time+'_'+n]?'☑':'□'}</td>`}
+          <td style="border:1px solid #ccc;padding:0 2px;font-size:8px;vertical-align:middle">${rec['memo_'+slot.time+'_'+n]||''}</td>
+        </tr>`;
+      }
+
+      const thS = 'border:1px solid #ccc;padding:1px 1px;text-align:center;font-size:7px;background:#f0f0f0;font-weight:700;line-height:1.2';
+      const leftRows  = Array.from({length:half},(_,i) => makeRowHtml(i+1,      matched[i]||null)).join('');
+      const rightRows = Array.from({length:half},(_,i) => makeRowHtml(i+half+1, matched[i+half]||null)).join('');
+      const thead = `<tr>
+        <th style="${thS};width:16px">No</th><th style="${thS};text-align:left;padding-left:2px">氏名</th>
+        <th style="${thS};width:18px">学年</th><th style="${thS};width:16px;color:#1a5fa8">振替</th>
+        <th style="${thS};width:16px;color:#1a5fa8">体験</th>
+        ${isKojin?'':`<th style="${thS};width:16px;color:#1a5fa8">チケット</th>`}
+        <th style="${thS}">メモ</th>
+      </tr>`;
+      const tbl = `<table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px"><thead>${thead}</thead><tbody>ROWS</tbody></table>`;
+
+      const borderColor = slot.bg==='#fce4ec'?'#e91e8c':slot.bg==='#e3f2fd'?'#1a5fa8':slot.bg==='#e8f5e9'?'#2d7a4f':'#888';
+      return `<div style="margin-bottom:2px">
+        <div style="padding:1px 3px;border-left:3px solid ${borderColor};margin-bottom:1px;display:flex;justify-content:space-between">
+          <span style="font-size:9px;font-weight:700">${slot.cls}　<span style="font-size:8px;font-weight:400;color:#555">${slot.time}</span></span>
+          <span style="font-size:8px;color:#888">定員${cap}名</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+          ${tbl.replace('ROWS', leftRows)}
+          ${tbl.replace('ROWS', rightRows)}
+        </div>
+      </div>`;
+    }
+
+    const slotsHtml = slots.map(s => buildSlotHtml(s)).join('');
+    const noClassNote = noClass ? '<div style="text-align:center;color:#888;font-size:9px;padding:4px">クラスなし（29日以降）</div>' : '';
+
+    return `<div class="page">
+      <div style="padding:3px 6px;border-bottom:2px solid #333;margin-bottom:3px;display:flex;align-items:flex-end;justify-content:space-between">
+        <div>
+          <div style="font-size:8px;color:#888">Cosmic art Mira</div>
+          <div style="display:flex;align-items:baseline;gap:4px">
+            <span style="font-size:22px;font-weight:900;line-height:1">${dd}日</span>
+            <span style="font-size:14px;font-weight:700">（${dow}）</span>
+            <span style="font-size:10px;font-weight:700;color:#444">${wl}${dow}曜日</span>
+          </div>
+        </div>
+        <span style="font-size:9px;color:#666">${y}年${m}月</span>
+      </div>
+      <table style="border-collapse:collapse;font-size:9px;margin-bottom:3px;width:100%">
+        <tbody>${staffRows}</tbody>
+      </table>
+      ${slotsHtml}${noClassNote}
+    </div>`;
+  }
+
+  for(let dd=1; dd<=days; dd++) {
+    const page = buildDayPage(dd);
+    if(page) pages.push(page);
+  }
+
+  if(pages.length===0){ alert('この月に授業日がありません'); return; }
+  let iframe = document.getElementById('print-iframe');
+  if(!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'print-iframe';
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none';
+    document.body.appendChild(iframe);
+  }
+  const iDoc2 = iframe.contentDocument || iframe.contentWindow.document;
+  iDoc2.open();
+  iDoc2.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+    <title>${y}年${m}月 全日名簿</title>
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;font-size:9px}
+      .page{padding:3px 5px;page-break-after:always}
+      .page:last-child{page-break-after:auto}
+      table{border-collapse:collapse}
+      td,th{font-size:8px;padding:0 2px;border:1px solid #ccc}
+      @media print{@page{size:A4;margin:6mm 6mm 6mm 18mm}.page{page-break-after:always}}
+    </style>
+  </head><body>${pages.join('')}</body></html>`);
+  iDoc2.close();
+  setTimeout(() => { iframe.contentWindow.focus(); iframe.contentWindow.print(); }, 600);
+}
+
+function exportMonth() {
+  const sel = document.getElementById('msel');
+  if(!sel || !sel.value) return;
+  const ym = sel.value;
+  const [dy, dm] = ym.split('-').map(Number);
+  const act = members.filter(m => m.status==='active' || m.status==='ticket');
+  const sorted = [...act].sort((a,b) => (a.kana||'').localeCompare(b.kana||'','ja'));
+  const rev = act.filter(m=>m.status==='active').reduce((s,m)=>s+(Number(m.fee)||0),0);
+  const title = `Cosmic art Mira　${dy}年${dm}月　生徒名簿`;
+
+  // クラス略称マップ
+  const CLS_SHORT = {
+    '小学生':'小','幼児':'幼','Jr.':'Jr','絵画専門':'絵',
+    'イラスト':'イラ','工芸デザイン':'工','建築造形':'建','個別':'個'
+  };
+
+  // 第1〜第4週の欄に表示するテキストを生成
+  function calcWeekContent(schedule, timeStr, clsStr) {
+    const parts   = schedule.split('/').map(s => s.trim());
+    const times   = (timeStr||'').split('/').map(s => s.trim());
+    const clsList = (clsStr||'').split('/').map(s => (CLS_SHORT[s.trim()] || s.trim()));
+    const weeks   = {1:[],2:[],3:[],4:[]};
+    parts.forEach((part, i) => {
+      const t   = times[i] || times[times.length-1] || '';
+      const dow = (part.match(/[月火水木金土日]/) || [''])[0];
+      if(!dow) return;
+      let activeWeeks = [];
+      if(part.includes('毎週')) {
+        activeWeeks = [1,2,3,4];
+      } else {
+        const nm = part.match(/第([\d,]+)/);
+        activeWeeks = nm ? nm[1].split(',').map(Number) : [1,2,3,4];
+      }
+      const prefix = clsList.length > 1 ? (clsList[i] || clsList[clsList.length-1]) : '';
+      const label  = prefix + dow + t;
+      activeWeeks.forEach(w => { if(weeks[w]) weeks[w].push(label); });
+    });
+    return [1,2,3,4].map(w => weeks[w].join('\n'));
+  }
+
+  // 複数クラス判定（time に / が含まれ、かつ schedule の / 数と合わない → 同日複数クラス）
+  function isMultiClass(m) {
+    return (m.cls||'').includes('/');
+  }
+
+  // 学年区分
+  function gradeShort(g) {
+    if(!g) return '小';
+    if(g.includes('幼')||g.includes('年')) return '幼';
+    if(g.includes('中')||g.includes('高')) return '中';
+    return '小';
+  }
+
+  const rows = sorted.map((m, i) => {
+    const wc  = calcWeekContent(m.schedule||'', m.time||'', m.cls||'');
+    const multi = isMultiClass(m);
+    const bg  = i % 2 === 0 ? '#fff' : '#fafaf8';
+    const nameBg = multi ? '#fff9c4' : bg; // 複数講座は黄色背景
+
+    // 第1〜4週のセル
+    const wCells = wc.map(w => {
+      const lines = w.split('\n');
+      const inner = lines.map(l => `<div style="line-height:1.4;white-space:nowrap">${l}</div>`).join('');
+      return `<td style="border:1px solid #ccc;padding:1px 3px;text-align:center;font-size:10px;vertical-align:middle">${inner}</td>`;
+    }).join('');
+
+    return `<tr style="background:${bg}">
+      <td style="border:1px solid #ccc;padding:1px 3px;text-align:center;font-size:11px;font-weight:700">${m.shopfront===true?'○':m.shopfront||''}</td>
+      <td style="border:1px solid #ccc;padding:2px 4px;background:${nameBg}">
+        <div style="font-size:8px;color:#777;line-height:1.3;letter-spacing:0.02em">${m.kana||''}</div>
+        <div style="font-size:11px;font-weight:700;line-height:1.3">${m.name}${multi?'<span style="font-size:8px;color:#c00;margin-left:3px">複</span>':''}</div>
+      </td>
+      <td style="border:1px solid #ccc;padding:1px 4px;font-size:10px;text-align:right;white-space:nowrap">${m.fee?Number(m.fee).toLocaleString():''}</td>
+      <td style="border:1px solid #ccc;padding:1px 3px;text-align:center;font-size:10px">${m.grade||''}</td>
+      ${wCells}
+      <td style="border:1px solid #ccc;padding:1px 4px;font-size:10px">${m.cls||''}</td>
+      <td style="border:1px solid #ccc;padding:1px 4px;font-size:10px">${m.tel||''}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+    <title>${title}</title>
+    <style>
+      body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;font-size:10px;margin:0;padding:6px}
+      h2{font-size:13px;font-weight:900;margin:0 0 2px}
+      table{width:100%;border-collapse:collapse;table-layout:fixed}
+      th{background:#d8d8d8;padding:3px 3px;border:1px solid #999;font-size:9px;font-weight:700;text-align:center;line-height:1.3}
+      td{vertical-align:middle}
+      @media print{@page{size:A4 landscape;margin:5mm 5mm 5mm 18mm}body{padding:2px}}
+    </style>
+  </head><body>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+      <h2>${dy}年${dm}月　生徒名簿</h2>
+      <div style="font-size:8px;color:#666">在籍 ${sorted.length}名　月謝合計 ¥${rev.toLocaleString()}　※振りがあった場合は赤字で訂正　■は新規　黄色=複数講座</div>
+    </div>
+    <table>
+      <colgroup>
+        <col style="width:20px">
+        <col style="width:105px">
+        <col style="width:55px">
+        <col style="width:30px">
+        <col style="width:58px">
+        <col style="width:58px">
+        <col style="width:58px">
+        <col style="width:58px">
+        <col style="width:55px">
+        <col style="width:88px">
+      </colgroup>
+      <thead><tr>
+        <th style="writing-mode:vertical-rl;font-size:7px;padding:3px 1px">店頭<br>払</th>
+        <th>お客様名</th>
+        <th>金額</th>
+        <th>学年</th>
+        <th>第1週</th>
+        <th>第2週</th>
+        <th>第3週</th>
+        <th>第4週</th>
+        <th>クラス</th>
+        <th>連絡番号</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </body></html>`;
+
+  let iframe3 = document.getElementById('print-iframe');
+  if(!iframe3) {
+    iframe3 = document.createElement('iframe');
+    iframe3.id = 'print-iframe';
+    iframe3.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:none';
+    document.body.appendChild(iframe3);
+  }
+  const iDoc3 = iframe3.contentDocument || iframe3.contentWindow.document;
+  iDoc3.open();
+  iDoc3.write(html);
+  iDoc3.close();
+  setTimeout(() => { iframe3.contentWindow.focus(); iframe3.contentWindow.print(); }, 400);
+
+  // CSV同時出力
+  const csvRows = [
+    ['No','氏名','ふりがな','学年','受講日程','月回','時間','クラス','月謝','電話番号','入会日','状態'],
+    ...sorted.map((m2,i) => [i+1,m2.name,m2.kana||'',m2.grade||'',m2.schedule||'',m2.count||'',m2.time||'',m2.cls||'',m2.fee||'',m2.tel||'',m2.joinDate||'',m2.status==='active'?'在籍中':'チケット'])
+  ];
+  const bom = '\uFEFF';
+  const csv = bom + csvRows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `名簿_${dy}年${dm}月.csv`;
+  a.click();
+}
+
+function quickStaff(ds, name) {
+  if(!attendance[ds]) attendance[ds] = {};
+  const rec = attendance[ds];
+  const isWE = new Date(ds).getDay()===0 || new Date(ds).getDay()===6;
+  const hrs = STAFF_HOURS[name];
+  const start = hrs ? (isWE ? hrs.weekend.split('〜')[0] : hrs.weekday.split('〜')[0]) : '';
+  const end   = hrs ? (isWE ? hrs.weekend.split('〜')[1] : hrs.weekday.split('〜')[1]) : '';
+  // 既に入力済みなら削除
+  for(let n=1; n<=8; n++) {
+    if((rec['_sname'+n]||'') === name) {
+      rec['_sname'+n]=''; rec['_sstart'+n]=''; rec['_send'+n]='';
+      const en=document.getElementById('sn'+ds+'_'+n);
+      const es=document.getElementById('ss'+ds+'_'+n);
+      const ee=document.getElementById('se'+ds+'_'+n);
+      if(en) en.value=''; if(es) es.value=''; if(ee) ee.value='';
+      return;
+    }
+  }
+  // 空き欄に入力
+  for(let n=1; n<=8; n++) {
+    if(!(rec['_sname'+n]||'')) {
+      rec['_sname'+n]=name; rec['_sstart'+n]=start; rec['_send'+n]=end;
+      const en=document.getElementById('sn'+ds+'_'+n);
+      const es=document.getElementById('ss'+ds+'_'+n);
+      const ee=document.getElementById('se'+ds+'_'+n);
+      if(en) en.value=name; if(es) es.value=start; if(ee) ee.value=end;
+      return;
+    }
+  }
+}
+
+// ===== スタッフ設定 =====
+const STAFF_LIST = ['井坂楓華','関根里佳','安部昌代','村岡幸子','松橋理子','増原杏斗'];
+const STAFF_HOURS = {
+  '井坂楓華':  {weekday:'9:40〜18:40', weekend:'9:30〜17:30'},
+  '関根里佳':  {weekday:'9:40〜18:40', weekend:'9:30〜17:30'},
+  '安部昌代':  {weekday:'9:40〜16:00', weekend:'9:30〜17:00'},
+  '村岡幸子':  {weekday:'15:00〜18:40', weekend:'9:30〜17:00'},
+  '松橋理子':  {weekday:'15:00〜18:40', weekend:'9:30〜17:00'},
+  '増原杏斗':  {weekday:'15:00〜18:40', weekend:'9:30〜17:00'},
+};
+
+// ===== LocalStorage 保存・読込 =====
+const STORAGE_KEY = 'cosmicartmlira_data_v1';
+
+function exportJSON() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    members: members.map(m => ({...m})),
+    attendance: attendance,
+    history: history,
+    leaveRequests: leaveRequests,
+    nextId: nextId,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  const now = new Date();
+  a.href = URL.createObjectURL(blob);
+  a.download = `mira_名簿_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  document.getElementById('hd-sub').textContent = 'Cosmic art Mira｜💾 ' + a.download + ' を保存しました';
+  setTimeout(() => {
+    document.getElementById('hd-sub').textContent =
+      'Cosmic art Mira｜' + members.filter(m=>m.status==='active').length + '名在籍 ✓ 自動保存中';
+  }, 3000);
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!data.members || !Array.isArray(data.members)) {
+        alert('形式が正しくありません。Mira名簿のJSONファイルを選択してください。');
+        return;
+      }
+      if(!confirm(`データを読み込みます。\n\n生徒数: ${data.members.length}名\nエクスポート日時: ${data.exportedAt||'不明'}\n\n現在のデータは上書きされます。よろしいですか？`)) return;
+      members = data.members;
+      attendance = data.attendance || {};
+      history = data.history || [];
+      leaveRequests = data.leaveRequests || [];
+      nextId = data.nextId || (members.length + 1);
+      saveData();
+      renderM();
+      renderCal();
+      document.getElementById('hd-sub').textContent =
+        'Cosmic art Mira｜📂 ' + file.name + ' を読み込みました（' + members.length + '名）';
+      setTimeout(() => {
+        document.getElementById('hd-sub').textContent =
+          'Cosmic art Mira｜' + members.filter(m=>m.status==='active').length + '名在籍 ✓ 自動保存中';
+      }, 4000);
+    } catch(err) {
+      alert('読み込みエラー: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// Artifact Storage（共有ストレージ）を優先、失敗時はLocalStorageにフォールバック
+let _saveTimer = null;
+
+function saveData() {
+  // デバウンス（連続変更時は最後の1回だけ保存）
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => _doSave(), 800);
+}
+
+async function _doSave() {
+  const data = {
+    version: 2,
+    savedAt: new Date().toISOString(),
+    members: members.map(m => ({...m})),
+    attendance: attendance,
+    history: history,
+    leaveRequests: leaveRequests,
+    nextId: nextId,
+  };
+  const json = JSON.stringify(data);
+  // 1. Artifact Storage（全端末共有）に保存
+  try {
+    if(window.storage) {
+      await window.storage.set(STORAGE_KEY, json, true); // shared=true
+      _updateStatus('✓ クラウド保存済');
+      // LocalStorageにも同期
+      try { localStorage.setItem(STORAGE_KEY, json); } catch(e){}
+      return;
+    }
+  } catch(e) {
+    console.warn('クラウド保存失敗、ローカルに保存:', e);
+  }
+  // 2. フォールバック：LocalStorage
+  try {
+    localStorage.setItem(STORAGE_KEY, json);
+    _updateStatus('✓ ローカル保存済');
+  } catch(e) {
+    console.warn('ローカル保存失敗:', e);
+  }
+}
+
+function _updateStatus(msg) {
+  const el = document.getElementById('hd-sub');
+  if(el) {
+    const cnt = members.filter(m=>m.status==='active').length;
+    el.textContent = `Cosmic art Mira｜${cnt}名在籍 ${msg}`;
+  }
+}
+
+async function loadData() {
+  // 1. Artifact Storage（共有）から読み込み
+  try {
+    if(window.storage) {
+      const result = await window.storage.get(STORAGE_KEY, true); // shared=true
+      if(result && result.value) {
+        const data = JSON.parse(result.value);
+        if(data.members && data.members.length > 0) {
+          members = data.members;
+          attendance = data.attendance || {};
+          history = data.history || [];
+          leaveRequests = data.leaveRequests || [];
+          nextId = data.nextId || (members.length + 1);
+          console.log('クラウドから読み込み完了（' + members.length + '名）');
+          return true;
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('クラウド読み込み失敗:', e);
+  }
+  // 2. フォールバック：LocalStorage
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) {
+      const data = JSON.parse(raw);
+      if(data.members && data.members.length > 0) {
+        members = data.members;
+        attendance = data.attendance || {};
+        history = data.history || [];
+        leaveRequests = data.leaveRequests || [];
+        nextId = data.nextId || (members.length + 1);
+        console.log('ローカルから読み込み完了（' + members.length + '名）');
+        return true;
+      }
+    }
+  } catch(e) {
+    console.warn('ローカル読み込み失敗:', e);
+  }
+  return false;
+}
+
+function resetData() {
+  if(!confirm('全データをリセットして初期状態（CSVデータ）に戻しますか？\nこの操作は元に戻せません。')) return;
+  try { if(window.storage) window.storage.delete(STORAGE_KEY, true); } catch(e){}
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// 変更があるたびに自動保存するようにrenderMをラップ
+const _origRenderM = renderM;
+renderM = function() {
+  _origRenderM();
+  saveData();
+};
+
+// saveM, confLeave, markDone, saveLP にも保存を追加
+const _origSaveM = saveM;
+saveM = function() {
+  _origSaveM();
+  saveData();
+};
+const _origConfLeave = confLeave;
+confLeave = function() {
+  _origConfLeave();
+  saveData();
+};
+const _origMarkDone = markDone;
+markDone = function(i) {
+  _origMarkDone(i);
+  saveData();
+};
+const _origSaveLP = saveLP;
+saveLP = function() {
+  _origSaveLP();
+  saveData();
+};
+const _origSetStatus = setStatus;
+setStatus = function(s) {
+  _origSetStatus(s);
+  saveData();
+};
+
+// ===== 初期表示 =====
+(async function init() {
+  // リセットボタンをヘッダーに追加
+  const hdr = document.querySelector('.header > div:last-child');
+  if(hdr) {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = '🔄 リセット';
+    btn.style.cssText = 'font-size:11px;color:#c0392b;border-color:#f5c6c2';
+    btn.onclick = resetData;
+    hdr.appendChild(btn);
+  }
+  // ローディング表示
+  const sub = document.getElementById('hd-sub');
+  if(sub) sub.textContent = 'Cosmic art Mira｜読み込み中...';
+  // データ読み込み
+  const loaded = await loadData();
+  if(loaded) {
+    console.log('データ読み込み完了（' + members.length + '名）');
+  } else {
+    console.log('初期データ（CSVデータ）を使用します');
+  }
+  renderM();
+  renderCal();
+})();
+</script>
+</body>
+</html>
