@@ -1199,6 +1199,7 @@ function setStatus(s) {
     btn.style.fontWeight = s === st ? '700' : '400';
   });
   renderM();
+  if(selD) selDay(selD);
 }
 
 function triggerLeave() {
@@ -1269,6 +1270,8 @@ function confLeave() {
   history.push({date, name: m.name, action: '退会', note});
   closeLeave();
   renderM();
+  // 日別出席が表示中なら即反映
+  if(selD) selDay(selD);
 }
 
 // ===== CSV出力 =====
