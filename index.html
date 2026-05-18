@@ -118,6 +118,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
     <button class="tab" onclick="showTab('daily')">日別出席</button>
     <button class="tab" onclick="showTab('monthly')">月別まとめ</button>
     <button class="tab" onclick="showTab('history')">入退会履歴</button>
+    <button class="tab" onclick="showTab('staff')">👩‍🏫 スタッフ</button>
   </div>
 
   <!-- 在籍名簿 -->
@@ -219,6 +220,31 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
       </div>
     </div>
   </div>
+
+  <!-- スタッフ管理 -->
+  <div id="tab-staff" class="section">
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn btn-p" onclick="openAddStaff()">＋ スタッフを追加</button>
+        <span style="font-size:12px;color:var(--text2);margin-left:auto" id="staff-count"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>氏名</th>
+            <th>役職</th>
+            <th>平日 勤務時間</th>
+            <th>土日 勤務時間</th>
+            <th>電話番号</th>
+            <th>備考</th>
+            <th style="width:80px"></th>
+          </tr></thead>
+          <tbody id="staff-table"></tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--text2);margin-top:12px">※ 勤務時間は「9:40〜18:40」の形式で入力してください。日別出席の出勤候補ボタンに自動反映されます。</p>
+    </div>
+  </div>
 </div>
 
 <!-- 生徒追加モーダル -->
@@ -307,6 +333,39 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
   <option value="井坂楓華"><option value="関根里佳"><option value="安部昌代">
   <option value="村岡幸子"><option value="松橋理子"><option value="増原杏斗">
 </datalist>
+
+<!-- スタッフ追加・編集モーダル -->
+<div id="staff-modal" class="overlay">
+  <div class="modal" style="width:min(560px,95vw)">
+    <h3 id="staff-modal-title">＋ スタッフを追加</h3>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">氏名 *</div><input id="sf-name" placeholder="山田 花子"></div>
+      <div class="fg"><div class="fl">役職</div><input id="sf-role" placeholder="講師・管理者など"></div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">平日 勤務時間</div><input id="sf-wd" placeholder="9:40〜18:40"></div>
+      <div class="fg"><div class="fl">土日 勤務時間</div><input id="sf-we" placeholder="9:30〜17:30"></div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fg"><div class="fl">電話番号</div><input id="sf-tel" placeholder="090-0000-0000"></div>
+      <div class="fg"><div class="fl">雇用区分</div>
+        <select id="sf-type">
+          <option value="常勤">常勤</option>
+          <option value="パート">パート</option>
+          <option value="非常勤">非常勤</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px">
+      <div class="fl">備考</div><input id="sf-note" placeholder="担当クラス・特記事項など">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-r" id="sf-del-btn" onclick="deleteStaff()" style="display:none;margin-right:auto">削除</button>
+      <button class="btn" onclick="closeStaffModal()">キャンセル</button>
+      <button class="btn btn-p" onclick="saveStaff()">保存する</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ===== データ =====
@@ -494,7 +553,7 @@ leaveRequests = [
 // ===== タブ切替 =====
 function showTab(t) {
   document.querySelectorAll('.tab').forEach((b,i) => {
-    b.classList.toggle('active', ['members','lp','daily','monthly','history'][i] === t);
+    b.classList.toggle('active', ['members','lp','daily','monthly','history','staff'][i] === t);
   });
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + t).classList.add('active');
@@ -503,6 +562,7 @@ function showTab(t) {
   if(t==='daily') renderCal();
   if(t==='monthly') renderMo();
   if(t==='history') renderH();
+  if(t==='staff') renderStaff();
 }
 
 // ===== 在籍名簿 =====
@@ -625,43 +685,43 @@ function nextM() { calM++; if(calM>12){calM=1;calY++;} renderCal(); }
 const SCHEDULE_MASTER = {
   '月': [
     {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
-    {cls:'幼児',         time:'15:10〜16:00', cap:6,  bg:'#fffde7'},
-    {cls:'小学生',       time:'15:35〜16:50', cap:6,  bg:'#fffde7'},
-    {cls:'幼児',         time:'16:10〜17:00', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'15:10〜16:00', cap:4,  bg:'#fffde7'},
+    {cls:'小学生',       time:'15:35〜16:50', cap:5,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:5,  bg:'#fffde7'},
     {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
     {cls:'イラスト',     time:'17:00〜18:30', cap:4,  bg:'#fce4ec'},
-    {cls:'小学生',       time:'17:10〜18:25', cap:15, bg:'#fffde7'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:10, bg:'#fffde7'},
   ],
   '火': [
     {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
-    {cls:'幼児',         time:'15:45〜16:35', cap:6,  bg:'#fffde7'},
-    {cls:'幼児',         time:'16:10〜17:00', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'15:45〜16:35', cap:4,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:5,  bg:'#fffde7'},
     {cls:'イラスト',     time:'17:00〜18:30', cap:4,  bg:'#fce4ec'},
     {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
-    {cls:'小学生',       time:'17:10〜18:25', cap:12, bg:'#fffde7'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:10, bg:'#fffde7'},
   ],
   '水': [
     {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
-    {cls:'小学生',       time:'15:35〜16:50', cap:6,  bg:'#fffde7'},
+    {cls:'小学生',       time:'15:35〜16:50', cap:5,  bg:'#fffde7'},
     {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
     {cls:'建築造形',     time:'17:00〜18:30', cap:4,  bg:'#e3f2fd'},
-    {cls:'小学生',       time:'17:10〜18:25', cap:8,  bg:'#fffde7'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:10, bg:'#fffde7'},
   ],
   '木': [
     {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
-    {cls:'小学生',       time:'15:35〜16:50', cap:6,  bg:'#fffde7'},
-    {cls:'幼児',         time:'16:10〜17:00', cap:4,  bg:'#fffde7'},
+    {cls:'小学生',       time:'15:35〜16:50', cap:5,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:5,  bg:'#fffde7'},
     {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
     {cls:'工芸デザイン', time:'17:00〜18:30', cap:4,  bg:'#e8f5e9'},
-    {cls:'小学生',       time:'17:10〜18:25', cap:12, bg:'#fffde7'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:10, bg:'#fffde7'},
   ],
   '金': [
     {cls:'個別アトリエ', time:'15:00〜17:15', cap:4,  bg:'#fffde7'},
-    {cls:'幼児',         time:'15:10〜16:00', cap:6,  bg:'#fffde7'},
-    {cls:'幼児',         time:'16:10〜17:00', cap:6,  bg:'#fffde7'},
+    {cls:'幼児',         time:'15:10〜16:00', cap:4,  bg:'#fffde7'},
+    {cls:'幼児',         time:'16:10〜17:00', cap:5,  bg:'#fffde7'},
     {cls:'絵画専門',     time:'17:00〜18:30', cap:4,  bg:'#fffde7'},
     {cls:'イラスト',     time:'17:00〜18:30', cap:4,  bg:'#fce4ec'},
-    {cls:'小学生',       time:'17:10〜18:25', cap:12, bg:'#fffde7'},
+    {cls:'小学生',       time:'17:10〜18:25', cap:10, bg:'#fffde7'},
   ],
   '土': [
     {cls:'幼児',         time:'10:00〜10:50', cap:6,  bg:'#fffde7'},
@@ -749,8 +809,8 @@ function selDay(ds) {
   // 29日以降はクラスなし → 出勤者欄のみ表示
   if(parseInt(d) >= 29) {
     const weekLabel2 = WEEK_LABELS[week-1]||'';
-    const staffBtns2 = STAFF_LIST.map(s => {
-      const hrs = STAFF_HOURS[s];
+    const staffBtns2 = getSTAFF_LIST().map(s => {
+      const hrs = getSTAFF_HOURS()[s];
       const t = hrs ? (isWE ? hrs.weekend : hrs.weekday) : '';
       return `<button onclick="quickStaff('${ds}','${s}')" style="padding:2px 7px;border:1px solid #ccc;border-radius:8px;background:#fff;font-size:11px;cursor:pointer;margin:1px">${s}<span style="font-size:9px;color:#aaa;margin-left:2px">${t}</span></button>`;
     }).join('');
@@ -966,8 +1026,8 @@ function selDay(ds) {
   </table>`;
 
   // 出勤者候補ボタン
-  const staffBtns = STAFF_LIST.map(s => {
-    const hrs = STAFF_HOURS[s];
+  const staffBtns = getSTAFF_LIST().map(s => {
+    const hrs = getSTAFF_HOURS()[s];
     const t = hrs ? (isWE ? hrs.weekend : hrs.weekday) : '';
     return `<button onclick="quickStaff('${ds}','${s}')" style="padding:2px 7px;border:1px solid #ddd;border-radius:6px;background:#f5f5f5;font-size:10px;cursor:pointer;margin:1px">${s}<span style="font-size:8px;color:#aaa;margin-left:2px">${t}</span></button>`;
   }).join('');
@@ -1257,7 +1317,7 @@ function printDay(ds) {
       th{background:#eee;font-weight:700;text-align:center}
       button{display:none!important}
       input{border:none;background:transparent;font-size:8px;width:100%}
-      tr{height:16px!important;max-height:16px!important}
+      tr{min-height:14px}
       div[style*="font-size:12px"]{font-size:9px!important}
       div[style*="font-size:11px"]{font-size:9px!important}
       div[style*="font-size:10px"]{font-size:8px!important}
@@ -1308,9 +1368,11 @@ function printMonthAll() {
     const week = getWeekOfMonth(ds);
     const wl   = WEEK_LABELS[week-1]||'';
     const rec  = attendance[ds] || {};
+    // 29日以降もSCHEDULE_MASTERのスロットを使用（授業なし注記は付ける）
     const noClass = (dd >= 29);
-    const slots   = noClass ? [] : (SCHEDULE_MASTER[dow] || []);
-    if(slots.length === 0 && !noClass) return null;
+    const slots   = SCHEDULE_MASTER[dow] || [];
+    // SCHEDULE_MASTERに曜日がなければページ生成しない（通常は起きない）
+    if(slots.length === 0) return null;
 
     // この日の生徒（ここで確定させる）
     const dayStudents = getStudentsForDay(ds);
@@ -1376,7 +1438,7 @@ function printMonthAll() {
         const chkColor = st==='present'?'color:#2d7a4f':st==='absent'?'color:#c0392b':'color:#ccc';
         const rowBg = st==='present'?'background:#f0fbf4':st==='absent'?'background:#fff0f0':'';
         const timeInfo = isKojin && mx ? `<span style="font-size:7px;color:#1a5fa8;margin-left:3px">${mx.time||''}</span>` : '';
-        return `<tr style="height:16px;${rowBg}">
+        return `<tr style="height:18px;min-height:18px;${rowBg}">
           <td style="width:16px;border:1px solid #ccc;text-align:center;font-size:8px;font-weight:700;background:#f7f7f7;vertical-align:middle;padding:0">${n}</td>
           <td style="border:1px solid #ccc;padding:0 3px;vertical-align:middle;${rowBg}">
             ${mx ? `<span style="font-size:8px;${chkColor};font-weight:700;margin-right:2px">${chk}</span><span style="font-size:9px;font-weight:700">${mx.name}</span><span style="font-size:7px;color:#999;margin-left:2px">${mx.kana||''}</span>${timeInfo}` : ''}
@@ -1622,7 +1684,7 @@ function quickStaff(ds, name) {
   if(!attendance[ds]) attendance[ds] = {};
   const rec = attendance[ds];
   const isWE = new Date(ds).getDay()===0 || new Date(ds).getDay()===6;
-  const hrs = STAFF_HOURS[name];
+  const hrs = getSTAFF_HOURS()[name];
   const start = hrs ? (isWE ? hrs.weekend.split('〜')[0] : hrs.weekday.split('〜')[0]) : '';
   const end   = hrs ? (isWE ? hrs.weekend.split('〜')[1] : hrs.weekday.split('〜')[1]) : '';
   // 既に入力済みなら削除
@@ -1650,15 +1712,118 @@ function quickStaff(ds, name) {
 }
 
 // ===== スタッフ設定 =====
-const STAFF_LIST = ['井坂楓華','関根里佳','安部昌代','村岡幸子','松橋理子','増原杏斗'];
-const STAFF_HOURS = {
-  '井坂楓華':  {weekday:'9:40〜18:40', weekend:'9:30〜17:30'},
-  '関根里佳':  {weekday:'9:40〜18:40', weekend:'9:30〜17:30'},
-  '安部昌代':  {weekday:'9:40〜16:00', weekend:'9:30〜17:00'},
-  '村岡幸子':  {weekday:'15:00〜18:40', weekend:'9:30〜17:00'},
-  '松橋理子':  {weekday:'15:00〜18:40', weekend:'9:30〜17:00'},
-  '増原杏斗':  {weekday:'15:00〜18:40', weekend:'9:30〜17:00'},
-};
+let staffList = [
+  {id:1, name:'井坂楓華',  role:'講師', type:'常勤',  weekday:'9:40〜18:40', weekend:'9:30〜17:30', tel:'', note:''},
+  {id:2, name:'関根里佳',  role:'講師', type:'常勤',  weekday:'9:40〜18:40', weekend:'9:30〜17:30', tel:'', note:''},
+  {id:3, name:'安部昌代',  role:'講師', type:'常勤',  weekday:'9:40〜16:00', weekend:'9:30〜17:00', tel:'', note:''},
+  {id:4, name:'村岡幸子',  role:'講師', type:'パート', weekday:'15:00〜18:40', weekend:'9:30〜17:00', tel:'', note:''},
+  {id:5, name:'松橋理子',  role:'講師', type:'パート', weekday:'15:00〜18:40', weekend:'9:30〜17:00', tel:'', note:''},
+  {id:6, name:'増原杏斗',  role:'講師', type:'パート', weekday:'15:00〜18:40', weekend:'9:30〜17:00', tel:'', note:''},
+];
+let staffNextId = 7;
+
+// STAFF_LIST / STAFF_HOURS を staffList から動的生成
+function getSTAFF_LIST() { return staffList.map(s => s.name); }
+function getSTAFF_HOURS() {
+  const h = {};
+  staffList.forEach(s => { h[s.name] = {weekday: s.weekday, weekend: s.weekend}; });
+  return h;
+}
+
+// datalist を更新
+function updateStaffDatalist() {
+  const dl = document.getElementById('staff-dl');
+  if(dl) dl.innerHTML = staffList.map(s => `<option value="${s.name}">`).join('');
+}
+
+// ===== スタッフ一覧表示 =====
+function renderStaff() {
+  const tbody = document.getElementById('staff-table');
+  const count = document.getElementById('staff-count');
+  if(!tbody) return;
+  count.textContent = staffList.length + '名';
+  const typeColor = {常勤:'b-on', パート:'b-info', 非常勤:'b-ticket'};
+  tbody.innerHTML = staffList.map(s => `
+    <tr>
+      <td><div style="font-weight:600">${s.name}</div></td>
+      <td><span class="badge ${typeColor[s.type]||'b-info'}" style="font-size:10px">${s.type||'—'}</span></td>
+      <td style="font-size:12px">${s.role||'—'}</td>
+      <td style="font-size:12px;white-space:nowrap">${s.weekday||'—'}</td>
+      <td style="font-size:12px;white-space:nowrap">${s.weekend||'—'}</td>
+      <td style="font-size:12px">${s.tel||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${s.note||''}</td>
+      <td style="text-align:right">
+        <button class="btn btn-sm" onclick="openEditStaff(${s.id})">編集</button>
+      </td>
+    </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:24px">スタッフがいません</td></tr>';
+}
+
+// ===== スタッフ追加・編集モーダル =====
+let editStaffId = null;
+
+function openAddStaff() {
+  editStaffId = null;
+  document.getElementById('staff-modal-title').textContent = '＋ スタッフを追加';
+  document.getElementById('sf-del-btn').style.display = 'none';
+  ['sf-name','sf-role','sf-wd','sf-we','sf-tel','sf-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sf-type').value = '常勤';
+  document.getElementById('staff-modal').classList.add('open');
+}
+
+function openEditStaff(id) {
+  editStaffId = id;
+  const s = staffList.find(x => x.id === id);
+  if(!s) return;
+  document.getElementById('staff-modal-title').textContent = '✏️ ' + s.name + ' を編集';
+  document.getElementById('sf-name').value = s.name;
+  document.getElementById('sf-role').value = s.role||'';
+  document.getElementById('sf-wd').value   = s.weekday||'';
+  document.getElementById('sf-we').value   = s.weekend||'';
+  document.getElementById('sf-tel').value  = s.tel||'';
+  document.getElementById('sf-note').value = s.note||'';
+  document.getElementById('sf-type').value = s.type||'常勤';
+  document.getElementById('sf-del-btn').style.display = '';
+  document.getElementById('staff-modal').classList.add('open');
+}
+
+function closeStaffModal() {
+  document.getElementById('staff-modal').classList.remove('open');
+}
+
+function saveStaff() {
+  const name = document.getElementById('sf-name').value.trim();
+  if(!name) { alert('氏名は必須です'); return; }
+  const data = {
+    name,
+    role:    document.getElementById('sf-role').value.trim(),
+    weekday: document.getElementById('sf-wd').value.trim(),
+    weekend: document.getElementById('sf-we').value.trim(),
+    tel:     document.getElementById('sf-tel').value.trim(),
+    note:    document.getElementById('sf-note').value.trim(),
+    type:    document.getElementById('sf-type').value,
+  };
+  if(editStaffId) {
+    const s = staffList.find(x => x.id === editStaffId);
+    Object.assign(s, data);
+  } else {
+    staffList.push({id: staffNextId++, ...data});
+  }
+  updateStaffDatalist();
+  closeStaffModal();
+  renderStaff();
+  saveData();
+}
+
+function deleteStaff() {
+  if(!editStaffId) return;
+  const s = staffList.find(x => x.id === editStaffId);
+  if(!confirm(`「${s.name}」を削除しますか？`)) return;
+  staffList = staffList.filter(x => x.id !== editStaffId);
+  updateStaffDatalist();
+  closeStaffModal();
+  renderStaff();
+  saveData();
+}
 
 // ===== LocalStorage 保存・読込 =====
 const STORAGE_KEY = 'cosmicartmlira_data_v1';
@@ -1703,6 +1868,11 @@ function importJSON(input) {
       history = data.history || [];
       leaveRequests = data.leaveRequests || [];
       nextId = data.nextId || (members.length + 1);
+      if(data.staffList && Array.isArray(data.staffList) && data.staffList.length > 0) {
+        staffList = data.staffList;
+        staffNextId = data.staffNextId || (staffList.length + 1);
+        updateStaffDatalist();
+      }
       saveData();
       renderM();
       renderCal();
@@ -1738,6 +1908,8 @@ async function _doSave() {
     history: history,
     leaveRequests: leaveRequests,
     nextId: nextId,
+    staffList: staffList.map(s => ({...s})),
+    staffNextId: staffNextId,
   };
   const json = JSON.stringify(data);
   // 1. Artifact Storage（全端末共有）に保存
@@ -1782,6 +1954,11 @@ async function loadData() {
           history = data.history || [];
           leaveRequests = data.leaveRequests || [];
           nextId = data.nextId || (members.length + 1);
+          if(data.staffList && Array.isArray(data.staffList) && data.staffList.length > 0) {
+            staffList = data.staffList;
+            staffNextId = data.staffNextId || (staffList.length + 1);
+            updateStaffDatalist();
+          }
           console.log('クラウドから読み込み完了（' + members.length + '名）');
           return true;
         }
@@ -1801,6 +1978,11 @@ async function loadData() {
         history = data.history || [];
         leaveRequests = data.leaveRequests || [];
         nextId = data.nextId || (members.length + 1);
+        if(data.staffList && Array.isArray(data.staffList) && data.staffList.length > 0) {
+          staffList = data.staffList;
+          staffNextId = data.staffNextId || (staffList.length + 1);
+          updateStaffDatalist();
+        }
         console.log('ローカルから読み込み完了（' + members.length + '名）');
         return true;
       }
