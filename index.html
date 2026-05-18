@@ -1296,6 +1296,14 @@ function exportCSV() {
 function printDay(ds) {
   const sheet = document.getElementById('daily-sheet');
   if(!sheet || !ds) return;
+
+  // input/selectの現在値をvalue属性に反映（innerHTML取得時に値が消えないよう）
+  sheet.querySelectorAll('input').forEach(el => el.setAttribute('value', el.value));
+  sheet.querySelectorAll('select').forEach(el => {
+    Array.from(el.options).forEach(opt => {
+      opt.selected ? opt.setAttribute('selected','') : opt.removeAttribute('selected');
+    });
+  });
   const [y,mo,d] = ds.split('-');
   const dow = DAY_NAMES[new Date(ds).getDay()];
   const week = getWeekOfMonth(ds);
