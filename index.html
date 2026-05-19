@@ -123,7 +123,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
         </div>
         <div style="margin-top:10px;border-top:0.5px solid var(--border);padding-top:10px">
           <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📋 印刷</div>
-          <button class="btn btn-sm" style="width:100%;font-size:12px" onclick="printDaily()">日別名簿を印刷</button>
+          <button class="btn btn-sm" style="width:100%;font-size:12px;margin-bottom:4px" onclick="printDaily()">この日を印刷</button>
+          <button class="btn btn-sm" style="width:100%;font-size:12px;background:var(--text);color:#fff;border-color:var(--text)" onclick="openBulkPrint()">📅 一括印刷...</button>
         </div>
       </div>
       <div>
@@ -279,6 +280,27 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
   <div style="display:flex;gap:8px;justify-content:flex-end">
     <button class="btn" onclick="closeStaff()">閉じる</button>
     <button class="btn btn-p" onclick="saveStaff()">保存する</button>
+  </div>
+</div></div>
+
+
+<!-- 一括印刷 -->
+<div id="bpo" class="overlay"><div class="modal" style="width:min(420px,97vw)">
+  <h3>📅 日別名簿 一括印刷</h3>
+  <div class="g2" style="margin-bottom:12px">
+    <div class="fg"><div class="fl">開始日</div><input id="bp-start" type="date"></div>
+    <div class="fg"><div class="fl">終了日</div><input id="bp-end" type="date"></div>
+  </div>
+  <div style="margin-bottom:12px">
+    <div class="fl" style="margin-bottom:6px">印刷対象</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer"><input type="checkbox" id="bp-skip-noclass" checked> 授業なし日は除く</label>
+    </div>
+  </div>
+  <div id="bp-preview" style="font-size:12px;color:var(--text2);margin-bottom:14px;padding:8px;background:var(--bg2);border-radius:8px;min-height:32px"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn" onclick="closeBulkPrint()">キャンセル</button>
+    <button class="btn btn-p" onclick="doBulkPrint()">🖨️ 印刷する</button>
   </div>
 </div></div>
 
@@ -1698,6 +1720,105 @@ function printDay(ds){
 function printDaily(){
   if(!selD){alert('日付を選択してください');return;}
   printDay(selD);
+}
+
+
+// ===== 一括印刷機能 =====
+function openBulkPrint(){
+  // デフォルト: 今月の1日〜末日
+  const now = new Date();
+  const y = calY, m = calM2;
+  const start = y+'-'+String(m).padStart(2,'0')+'-01';
+  const lastDay = new Date(y, m, 0).getDate();
+  const end = y+'-'+String(m).padStart(2,'0')+'-'+String(lastDay).padStart(2,'0');
+  document.getElementById('bp-start').value = start;
+  document.getElementById('bp-end').value = end;
+  updateBulkPreview();
+  document.getElementById('bpo').classList.add('open');
+}
+
+function closeBulkPrint(){
+  document.getElementById('bpo').classList.remove('open');
+}
+
+function getBulkDays(){
+  const start = document.getElementById('bp-start').value;
+  const end = document.getElementById('bp-end').value;
+  const skipNoClass = document.getElementById('bp-skip-noclass').checked;
+  if(!start || !end) return [];
+  const days = [];
+  let cur = new Date(start);
+  const endDate = new Date(end);
+  while(cur <= endDate){
+    const ds = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
+    const classes = getClassesForDay(ds);
+    if(!skipNoClass || classes.length > 0){
+      days.push(ds);
+    }
+    cur.setDate(cur.getDate()+1);
+  }
+  return days;
+}
+
+function updateBulkPreview(){
+  const days = getBulkDays();
+  const el = document.getElementById('bp-preview');
+  if(!el) return;
+  if(days.length === 0){
+    el.textContent = '印刷対象の授業日がありません';
+    return;
+  }
+  const dayLabels = days.map(ds=>{
+    const d = new Date(ds);
+    const dow = DAY_NAMES[d.getDay()];
+    return ds.slice(5)+' ('+dow+')';
+  });
+  el.innerHTML = '<strong>印刷対象: '+days.length+'日</strong><br><span style="color:var(--text3)">'+dayLabels.join('、')+'</span>';
+}
+
+// 日付変更時にプレビュー更新
+document.getElementById('bp-start') && document.getElementById('bp-start').addEventListener('change', updateBulkPreview);
+document.getElementById('bp-end') && document.getElementById('bp-end').addEventListener('change', updateBulkPreview);
+document.getElementById('bp-skip-noclass') && document.getElementById('bp-skip-noclass').addEventListener('change', updateBulkPreview);
+
+function doBulkPrint(){
+  const days = getBulkDays();
+  if(days.length === 0){ alert('印刷対象の授業日がありません'); return; }
+  if(days.length > 31){ if(!confirm(days.length+'日分を印刷します。よろしいですか？')) return; }
+
+  let allHTML = '';
+  days.forEach((ds, i) => {
+    const date = new Date(ds);
+    const [sy, smo, sday] = ds.split('-');
+    const dow = DAY_NAMES[date.getDay()];
+    const week = getWeekOfMonth(ds);
+    const wl = WEEK_LABELS[week-1]||'';
+    const rec = attendance[ds]||{};
+    const todayClasses = getClassesForDay(ds);
+    const dayActives = members.filter(m=>(m.status==='active'||m.status==='ticket')&&(m.day||'').split('/').some(dd=>dd.trim()===dow));
+    const pageHTML = buildPrintHTML(ds, sy, smo, sday, dow, wl, week, todayClasses, dayActives, rec);
+    // buildPrintHTMLの<body>部分だけ取り出す
+    const bodyMatch = pageHTML.match(/<body>([\s\S]*)<\/body>/);
+    const bodyContent = bodyMatch ? bodyMatch[1] : pageHTML;
+    // ページ区切り
+    if(i > 0) allHTML += '<div style="page-break-before:always"></div>';
+    allHTML += bodyContent;
+  });
+
+  const fullHTML = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+  <style>
+    @page{size:A4 portrait;margin:3mm 5mm 3mm 15mm}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;font-size:7.5px;line-height:1.2}
+    .page-break{page-break-before:always}
+    @media screen{body{max-width:210mm;margin:0 auto;padding:10px}}
+  </style></head><body>${allHTML}</body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(fullHTML);
+  w.document.close();
+  setTimeout(()=>{ w.print(); }, 600);
+  closeBulkPrint();
 }
 
 function exportMonth(){
