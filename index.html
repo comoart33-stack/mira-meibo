@@ -74,6 +74,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
     <div><h1>🎨 アート教室 名簿管理</h1><p>Cosmic art Mira｜退会フォームデータ読込済み</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" onclick="openImp()">📥 データ取込</button>
+      <button class="btn" onclick="openStaff()">👥 スタッフ</button>
       <button class="btn btn-p" onclick="openAdd()">＋ 生徒追加</button>
 
     </div>
@@ -154,15 +155,50 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
 </div>
 
 <!-- 追加 -->
-<div id="ao" class="overlay"><div class="modal"><h3>＋ 生徒を追加</h3>
-<div class="g2" style="margin-bottom:10px"><div class="fg"><div class="fl">氏名 *</div><input id="an" placeholder="山田 花子"></div><div class="fg"><div class="fl">ふりがな</div><input id="ak" placeholder="やまだ はなこ"></div></div>
-<div class="g2" style="margin-bottom:10px"><div class="fg"><div class="fl">電話番号</div><input id="at" placeholder="090-0000-0000"></div><div class="fg"><div class="fl">月謝（円）</div><input id="af" type="number" placeholder="8000"></div></div>
-<div class="g3" style="margin-bottom:10px">
-  <div class="fg"><div class="fl">曜日</div><select id="ad"><option>月</option><option>火</option><option>水</option><option>木</option><option>金</option><option>土</option><option>日</option></select></div>
-  <div class="fg"><div class="fl">時間</div><input id="atm" placeholder="17:10"></div>
+<div id="ao" class="overlay"><div class="modal" style="width:min(580px,97vw)"><h3>＋ 生徒を追加</h3>
+<div class="g2" style="margin-bottom:10px">
+  <div class="fg"><div class="fl">氏名 *</div><input id="an" placeholder="山田 花子"></div>
+  <div class="fg"><div class="fl">ふりがな</div><input id="ak" placeholder="やまだ はなこ"></div>
+</div>
+<div class="g2" style="margin-bottom:10px">
+  <div class="fg"><div class="fl">電話番号</div><input id="at" placeholder="090-0000-0000"></div>
+  <div class="fg"><div class="fl">月謝（円）</div><input id="af" type="number" placeholder="8000"></div>
+</div>
+<div class="g2" style="margin-bottom:10px">
+  <div class="fg"><div class="fl">学年</div>
+    <select id="a-grade">
+      <option value="">未設定</option>
+      <option>0~2歳</option><option>年少</option><option>年中</option><option>年長</option>
+      <option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option>
+      <option>中1</option><option>中2</option><option>中3</option>
+      <option>高1</option><option>高2</option><option>高3</option>
+    </select>
+  </div>
   <div class="fg"><div class="fl">入会日 *</div><input id="aj" type="date"></div>
 </div>
-<div class="fg" style="margin-bottom:14px"><div class="fl">備考</div><input id="ano" placeholder="レベル・緊急連絡先など"></div>
+<div class="fg" style="margin-bottom:10px">
+  <div class="fl">クラス <span style="font-weight:400;color:var(--text3)">（複数選択可）</span></div>
+  <div id="a-cls-wrap" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--bg2);border-radius:8px;border:1px solid var(--border2)">
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="幼児"> 幼児</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="小学生"> 小学生</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="Jr."> Jr.アトリエ</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="イラスト"> ②イラスト</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="絵画専門"> ①絵画専門</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="工芸デザイン"> ③工芸デザイン</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="建築造形"> ④建築造形</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="a-cls" value="個別"> 個別アトリエ</label>
+  </div>
+</div>
+<div class="fg" style="margin-bottom:6px">
+  <div class="fl">受講日程 <span style="font-weight:400;color:var(--text3)">（/ で複数）</span></div>
+  <input id="a-schedule" placeholder="例: 第1,3土17:00/第2,4月17:00" style="font-size:13px">
+  <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6">
+    入力例：<code style="background:var(--bg3);padding:1px 5px;border-radius:4px">第1,3土17:10</code>　
+    <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">毎週火17:00</code>　
+    <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">第2,4金17:00/第1,3水15:35</code>
+  </div>
+</div>
+<div class="fg" style="margin-bottom:14px"><div class="fl">備考・緊急連絡先など</div><input id="ano" placeholder="緊急連絡先など"></div>
 <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="closeAdd()">キャンセル</button><button class="btn btn-p" onclick="addM()">追加する</button></div>
 </div></div>
 
@@ -171,6 +207,77 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
 <div class="fg" style="margin-bottom:10px"><div class="fl">退会日</div><input id="ld" type="date"></div>
 <div class="fg" style="margin-bottom:14px"><div class="fl">理由・備考</div><input id="ln" placeholder="引越し・体調不良など"></div>
 <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" onclick="closeLeave()">キャンセル</button><button class="btn btn-r" onclick="confLeave()">退会処理する</button></div>
+</div></div>
+
+
+<!-- 生徒編集 -->
+<div id="eo" class="overlay"><div class="modal" style="width:min(640px,97vw)">
+  <h3>✏️ 生徒情報を編集</h3>
+  <div class="g2" style="margin-bottom:10px">
+    <div class="fg"><div class="fl">氏名 *</div><input id="e-name" placeholder="山田 花子"></div>
+    <div class="fg"><div class="fl">ふりがな</div><input id="e-kana" placeholder="やまだ はなこ"></div>
+  </div>
+  <div class="g2" style="margin-bottom:10px">
+    <div class="fg"><div class="fl">電話番号</div><input id="e-tel" placeholder="090-0000-0000"></div>
+    <div class="fg"><div class="fl">月謝（円）</div><input id="e-fee" type="number" placeholder="8000"></div>
+  </div>
+  <div class="g2" style="margin-bottom:10px">
+    <div class="fg"><div class="fl">学年</div>
+      <select id="e-grade">
+        <option value="">未設定</option>
+        <option>0~2歳</option><option>年少</option><option>年中</option><option>年長</option>
+        <option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option>
+        <option>中1</option><option>中2</option><option>中3</option>
+        <option>高1</option><option>高2</option><option>高3</option>
+      </select>
+    </div>
+    <div class="fg"><div class="fl">入会日</div><input id="e-joinDate" type="date"></div>
+  </div>
+  <div class="fg" style="margin-bottom:10px">
+    <div class="fl">クラス <span style="font-weight:400;color:var(--text3)">（複数選択可）</span></div>
+    <div id="e-cls-wrap" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--bg2);border-radius:8px;border:1px solid var(--border2)">
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="幼児"> 幼児</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="小学生"> 小学生</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="Jr."> Jr.アトリエ</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="イラスト"> ②イラスト</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="絵画専門"> ①絵画専門</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="工芸デザイン"> ③工芸デザイン</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="建築造形"> ④建築造形</label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg)"><input type="checkbox" name="e-cls" value="個別"> 個別アトリエ</label>
+    </div>
+  </div>
+  <div class="fg" style="margin-bottom:10px">
+    <div class="fl">受講日程 <span style="font-weight:400;color:var(--text3)">（/ で複数）</span></div>
+    <input id="e-schedule" placeholder="例: 第1,3土17:00/第2,4月17:00">
+    <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6">
+      入力例：<code style="background:var(--bg3);padding:1px 5px;border-radius:4px">第1,3土17:10</code>　
+      <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">毎週火17:00</code>　
+      <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">第2,4金17:00/第1,3水15:35</code>
+    </div>
+  </div>
+  <div class="fg" style="margin-bottom:10px">
+    <div class="fl">状態</div>
+    <select id="e-status">
+      <option value="active">在籍中</option>
+      <option value="ticket">チケット制</option>
+      <option value="inactive">退会済</option>
+    </select>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn" onclick="closeEdit()">キャンセル</button>
+    <button class="btn btn-p" onclick="saveEdit()">保存する</button>
+  </div>
+</div></div>
+
+<!-- スタッフ管理 -->
+<div id="so" class="overlay"><div class="modal" style="width:min(580px,97vw)">
+  <h3>👥 スタッフ管理</h3>
+  <div id="staff-list-edit" style="margin-bottom:16px"></div>
+  <button class="btn btn-sm" onclick="addStaffRow()" style="margin-bottom:14px">＋ スタッフ追加</button>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn" onclick="closeStaff()">閉じる</button>
+    <button class="btn btn-p" onclick="saveStaff()">保存する</button>
+  </div>
 </div></div>
 
 <!-- インポート -->
@@ -517,7 +624,7 @@ function renderM(){
     <td style="font-size:12px;color:var(--text2)">${m.parent||'—'}</td>
     <td style="font-size:12px;white-space:nowrap">${m.joinDate||'—'}</td>
     <td><span class="badge ${m.status==='active'?'b-on':m.status==='ticket'?'b-ticket':'b-off'}">${m.status==='active'?'在籍中':m.status==='ticket'?'チケット':'退会済'}</span>${m.note&&m.note.includes('退会申請')?'<span style="font-size:10px;color:var(--red);display:block">⚠️退会予定</span>':''}</td>
-    <td style="text-align:right">${m.status!=='inactive'?`<button class="btn btn-sm btn-r" onclick="openLeave(${m.id})">退会</button>`:''}</td>
+    <td style="text-align:right;white-space:nowrap"><button class="btn btn-sm" onclick="openEdit(${m.id})" style="margin-right:3px">✏️</button>${m.status!=='inactive'?`<button class="btn btn-sm btn-r" onclick="openLeave(${m.id})">退会</button>`:''}</td>
   </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">生徒が登録されていません。「＋生徒追加」か「データ取込」から追加してください。</td></tr>';
 }
 
@@ -527,15 +634,109 @@ function renderLP(){
 
 function markD(i){LR[i].done=true;const r=LR[i];history.push({date:r.date.replace(/\//g,'-'),name:r.name,action:r.type,note:r.month+(r.reason!=='—'?' / '+r.reason:'')});renderLP();const pn=LR.filter(x=>!x.done).length;document.getElementById('lp-n').textContent=pn||'';}
 
-function openAdd(){document.getElementById('aj').value=new Date().toISOString().slice(0,10);document.getElementById('ao').classList.add('open');}
+const WEEK_OPTIONS_LIST = [
+  {val:'0', label:'毎週'},
+  {val:'13', label:'第1,3'},{val:'24', label:'第2,4'},
+  {val:'1', label:'第1のみ'},{val:'2', label:'第2のみ'},{val:'3', label:'第3のみ'},{val:'4', label:'第4のみ'},
+  {val:'12', label:'第1,2'},{val:'123', label:'第1,2,3'},{val:'134', label:'第1,3,4'},
+  {val:'234', label:'第2,3,4'},{val:'1234', label:'毎週(第1〜4)'},
+];
+const DAY_JP_LIST = ['月','火','水','木','金','土','日'];
+
+function slotRowHTML(idx, dow='', week='0', time='', prefix='a'){
+  return `<div class="slot-row-${prefix}" data-idx="${idx}" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;padding:6px 8px;background:var(--bg2);border-radius:8px;flex-wrap:wrap">
+    <select class="slot-dow-${prefix}" style="width:60px;padding:4px 6px;font-size:13px;border:1px solid var(--border2);border-radius:6px;background:var(--bg)">
+      <option value="">曜日</option>
+      ${DAY_JP_LIST.map(d=>'<option value="'+d+'"'+(dow===d?' selected':'')+'>'+d+'</option>').join('')}
+    </select>
+    <select class="slot-week-${prefix}" style="width:110px;padding:4px 6px;font-size:13px;border:1px solid var(--border2);border-radius:6px;background:var(--bg)">
+      ${WEEK_OPTIONS_LIST.map(w=>'<option value="'+w.val+'"'+(week===w.val?' selected':'')+'>'+w.label+'</option>').join('')}
+    </select>
+    <input class="slot-time-${prefix}" value="${time}" placeholder="17:10" style="width:70px;padding:4px 6px;font-size:13px;border:1px solid var(--border2);border-radius:6px;background:var(--bg)">
+    <button onclick="this.closest('.slot-row-${prefix}').remove()" style="padding:2px 7px;border:1px solid #f5c6c2;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-size:12px">✕</button>
+  </div>`;
+}
+
+function addSlotA(){
+  const c=document.getElementById('a-slots');
+  const div=document.createElement('div');
+  div.innerHTML=slotRowHTML(c.querySelectorAll('.slot-row-a').length,'','0','','a');
+  c.appendChild(div.firstElementChild);
+}
+
+function parseScheduleText(scheduleText, cls){
+  // "第1,3土17:10/第2,4月17:00" → {day, time, note}
+  const parts = scheduleText.split('/').map(s=>s.trim()).filter(Boolean);
+  const DAY_MAP = {'月':'月','火':'火','水':'水','木':'木','金':'金','土':'土','日':'日'};
+  const days=[], times=[], noteParts=[];
+  parts.forEach(part=>{
+    const dowMatch = part.match(/[月火水木金土日]/);
+    const timeMatch = part.match(/(\d{1,2}:\d{2})/);
+    if(!dowMatch) return;
+    const dow = dowMatch[0];
+    const time = timeMatch ? timeMatch[1] : '';
+    if(!days.includes(dow)) days.push(dow);
+    if(time && !times.includes(time)) times.push(time);
+    // 週指定
+    const weekMatch = part.match(/第([\d,]+)/);
+    if(weekMatch && time){
+      noteParts.push('第'+weekMatch[1]+dow+time);
+    } else if((part.includes('毎週')||!weekMatch) && time){
+      // 毎週の場合はnoteにスロット記述なし
+    }
+  });
+  const day = days.join('/');
+  const time = times.join('/');
+  const note = noteParts.length > 0 ? cls+'　'+noteParts.join('・') : cls;
+  return {day, time, note};
+}
+
+function openAdd(){
+  document.getElementById('aj').value=new Date().toISOString().slice(0,10);
+  document.getElementById('a-schedule').value='';
+  document.querySelectorAll('input[name="a-cls"]').forEach(cb=>cb.checked=false);
+  document.getElementById('a-grade').value='';
+  document.getElementById('ao').classList.add('open');
+}
 function closeAdd(){document.getElementById('ao').classList.remove('open');}
+
+function slotsToNoteDay(rows, cls, prefix='a'){
+  const weekLabels={'0':'','1':'第1','2':'第2','3':'第3','4':'第4','12':'第1,2','13':'第1,3','24':'第2,4','123':'第1,2,3','134':'第1,3,4','234':'第2,3,4','1234':''};
+  const slots=[];
+  rows.forEach(row=>{
+    const dow=row.querySelector('.slot-dow-'+prefix).value;
+    const week=row.querySelector('.slot-week-'+prefix).value;
+    const time=row.querySelector('.slot-time-'+prefix).value.trim();
+    if(dow&&time)slots.push({dow,week,time});
+  });
+  if(!slots.length) return {day:'',time:'',note:cls};
+  const day=[...new Set(slots.map(s=>s.dow))].join('/');
+  const time=[...new Set(slots.map(s=>s.time))].join('/');
+  const noteParts=slots.map(s=>{const wl=weekLabels[s.week]||'';return wl?wl+s.dow+s.time:'';}).filter(Boolean);
+  const note=cls+(noteParts.length?'　'+noteParts.join('・'):'');
+  return {day,time,note};
+}
+
 function addM(){
   const name=document.getElementById('an').value.trim();
   if(!name){alert('氏名は必須です');return;}
   const join=document.getElementById('aj').value;
-  const m={id:nextId++,name,kana:document.getElementById('ak').value.trim(),tel:document.getElementById('at').value.trim(),fee:document.getElementById('af').value,day:document.getElementById('ad').value,time:document.getElementById('atm').value.trim(),joinDate:join,status:'active',note:document.getElementById('ano').value.trim()};
-  members.push(m);history.push({date:join,name:m.name,action:'入会',note:m.day+'曜'+m.time});
-  closeAdd();['an','ak','at','af','atm','ano'].forEach(id=>document.getElementById(id).value='');renderM();
+  const cls=[...document.querySelectorAll('input[name="a-cls"]:checked')].map(cb=>cb.value).join('/');
+  const schedText=document.getElementById('a-schedule').value.trim();
+  const {day,time,note}=schedText?parseScheduleText(schedText,cls):{day:'',time:'',note:cls};
+  const m={id:nextId++,name,
+    kana:document.getElementById('ak').value.trim(),
+    tel:document.getElementById('at').value.trim(),
+    fee:document.getElementById('af').value,
+    grade:document.getElementById('a-grade').value,
+    day,time,joinDate:join,status:'active',note,
+    memo:document.getElementById('ano').value.trim()};
+  members.push(m);
+  history.push({date:join,name:m.name,action:'入会',note:schedText||cls});
+  closeAdd();
+  ['an','ak','at','af','ano'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-grade').value='';
+  renderM();
 }
 
 function openLeave(id){lvId=id;const m=members.find(x=>x.id===id);document.getElementById('lt').textContent='退会処理：'+m.name;document.getElementById('ld').value=new Date().toISOString().slice(0,10);document.getElementById('ln').value='';document.getElementById('lo').classList.add('open');}
@@ -1522,6 +1723,196 @@ function exportMonth(){
   w.document.write(allHTML);w.document.close();
   setTimeout(()=>w.print(),500);
 }
+
+// ===== 生徒編集機能 =====
+let editId = null;
+
+function openEdit(id){
+  editId = id;
+  const m = members.find(x => x.id === id);
+  if(!m) return;
+  document.getElementById('e-name').value = m.name || '';
+  document.getElementById('e-kana').value = m.kana || '';
+  document.getElementById('e-tel').value = m.tel || '';
+  document.getElementById('e-fee').value = m.fee || '';
+  document.getElementById('e-grade').value = m.grade || '';
+  document.getElementById('e-joinDate').value = m.joinDate || '';
+  document.getElementById('e-status').value = m.status || 'active';
+  // 受講日程をnoteから復元して表示
+  const noteVal = m.note || '';
+  const schedParts = [];
+  // noteから 第X,Y曜TIME パターンを抽出
+  const re1 = /第([\d,]+)([月火水木金土日])(\d{1,2}:\d{2})/g;
+  let rm;
+  while((rm=re1.exec(noteVal))!==null){
+    schedParts.push('第'+rm[1]+rm[2]+rm[3]);
+  }
+  document.getElementById('e-schedule').value = schedParts.length>0 ? schedParts.join('/') : '';
+  // クラス選択（noteから複数クラスを判断してチェック）
+  const note = m.note || '';
+  document.querySelectorAll('input[name="e-cls"]').forEach(cb=>{
+    cb.checked = note.includes(cb.value);
+  });
+  // スロット表示
+  renderSlots(m);
+  document.getElementById('eo').classList.add('open');
+}
+
+function renderSlots(m){
+  const container = document.getElementById('e-slots');
+  const days = (m.day||'').split('/').map(d=>d.trim()).filter(Boolean);
+  const times = (m.time||'').split('/').map(t=>t.trim()).filter(Boolean);
+  const note = m.note || '';
+  const slots = [];
+  for(let i=0;i<Math.max(days.length,1);i++){
+    const dow = days[i] || '';
+    const t = times[i] || times[0] || '';
+    let week = '0';
+    if(dow){
+      const re = new RegExp('第([\d,]+)'+dow);
+      const wm = note.match(re);
+      if(wm){ week = wm[1].replace(/,/g,''); }
+    }
+    slots.push({dow, time:t, week});
+  }
+  container.innerHTML = slots.map((s,i)=>slotRowHTML(i,s.dow,s.week,s.time,'e')).join('');
+}
+
+
+function addSlot(){
+  const c=document.getElementById('e-slots');
+  const div=document.createElement('div');
+  div.innerHTML=slotRowHTML(c.querySelectorAll('.slot-row-e').length,'','0','','e');
+  c.appendChild(div.firstElementChild);
+}
+
+
+function removeSlot(idx){
+  const rows = document.getElementById('e-slots').querySelectorAll('.slot-row-e');
+  if(rows[idx]) rows[idx].remove();
+}
+
+function saveEdit(){
+  if(!editId) return;
+  const m = members.find(x => x.id === editId);
+  if(!m) return;
+  m.name = document.getElementById('e-name').value.trim();
+  m.kana = document.getElementById('e-kana').value.trim();
+  m.tel = document.getElementById('e-tel').value.trim();
+  m.fee = document.getElementById('e-fee').value;
+  m.grade = document.getElementById('e-grade').value;
+  m.joinDate = document.getElementById('e-joinDate').value;
+  m.status = document.getElementById('e-status').value;
+  const cls = [...document.querySelectorAll('input[name="e-cls"]:checked')].map(cb=>cb.value).join('/');
+
+  // 受講日程テキストからday/time/noteを更新
+  const schedText2 = document.getElementById('e-schedule').value.trim();
+  if(schedText2){
+    const {day:nd, time:nt, note:nn} = parseScheduleText(schedText2, cls);
+    if(nd){ m.day=nd; m.time=nt; m.note=nn; }
+    else { m.note = cls + (schedText2 ? '\u3000'+schedText2 : ''); }
+  } else {
+    m.note = cls;
+  }
+
+  closeEdit();
+  renderM();
+  if(selD) selDay(selD);
+}
+
+function closeEdit(){
+  document.getElementById('eo').classList.remove('open');
+  editId = null;
+}
+
+// ===== スタッフ管理機能 =====
+function openStaff(){
+  renderStaffEdit();
+  document.getElementById('so').classList.add('open');
+}
+
+function closeStaff(){
+  document.getElementById('so').classList.remove('open');
+}
+
+function renderStaffEdit(){
+  const container = document.getElementById('staff-list-edit');
+  container.innerHTML = STAFF_LIST.map((s,i) => {
+    const hrs = STAFF_HOURS[s] || {weekday:'', weekend:''};
+    return `
+    <div class="staff-row" data-idx="${i}" style="display:grid;grid-template-columns:1fr 130px 130px 32px;gap:6px;align-items:center;margin-bottom:8px;padding:8px 10px;background:var(--bg2);border-radius:8px">
+      <div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:2px">氏名</div>
+        <input class="stf-name" value="${s}" style="border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:13px;background:var(--bg);width:100%">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:2px">平日</div>
+        <input class="stf-wd" value="${hrs.weekday}" placeholder="9:40〜18:40" style="border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:12px;background:var(--bg);width:100%">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:2px">土日</div>
+        <input class="stf-we" value="${hrs.weekend}" placeholder="9:30〜17:00" style="border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:12px;background:var(--bg);width:100%">
+      </div>
+      <button onclick="removeStaffRow(${i})" style="padding:2px 7px;border:1px solid #f5c6c2;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-size:12px;align-self:flex-end;margin-bottom:2px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addStaffRow(){
+  const container = document.getElementById('staff-list-edit');
+  const idx = container.querySelectorAll('.staff-row').length;
+  const div = document.createElement('div');
+  div.className = 'staff-row';
+  div.dataset.idx = idx;
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 130px 130px 32px;gap:6px;align-items:center;margin-bottom:8px;padding:8px 10px;background:var(--bg2);border-radius:8px';
+  div.innerHTML = `
+    <div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:2px">氏名</div>
+      <input class="stf-name" value="" placeholder="氏名" style="border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:13px;background:var(--bg);width:100%">
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:2px">平日</div>
+      <input class="stf-wd" value="" placeholder="9:40〜18:40" style="border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:12px;background:var(--bg);width:100%">
+    </div>
+    <div>
+      <div style="font-size:10px;color:var(--text2);margin-bottom:2px">土日</div>
+      <input class="stf-we" value="" placeholder="9:30〜17:00" style="border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:12px;background:var(--bg);width:100%">
+    </div>
+    <button onclick="removeStaffRow(${idx})" style="padding:2px 7px;border:1px solid #f5c6c2;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-size:12px;align-self:flex-end;margin-bottom:2px">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function removeStaffRow(idx){
+  const rows = document.getElementById('staff-list-edit').querySelectorAll('.staff-row');
+  if(rows[idx]) rows[idx].remove();
+}
+
+function saveStaff(){
+  const rows = document.getElementById('staff-list-edit').querySelectorAll('.staff-row');
+  const newList = [];
+  const newHours = {};
+  rows.forEach(row => {
+    const name = row.querySelector('.stf-name').value.trim();
+    const wd = row.querySelector('.stf-wd').value.trim();
+    const we = row.querySelector('.stf-we').value.trim();
+    if(name){
+      newList.push(name);
+      newHours[name] = {weekday: wd, weekend: we};
+    }
+  });
+  STAFF_LIST.length = 0;
+  newList.forEach(n => STAFF_LIST.push(n));
+  Object.keys(STAFF_HOURS).forEach(k => delete STAFF_HOURS[k]);
+  Object.assign(STAFF_HOURS, newHours);
+  // datalistも更新
+  const dl = document.getElementById('staff-datalist');
+  if(dl) dl.innerHTML = STAFF_LIST.map(s=>`<option value="${s}">`).join('\n');
+  closeStaff();
+  if(selD) selDay(selD);
+  alert('スタッフ情報を保存しました（' + STAFF_LIST.length + '名）');
+}
+
 
 (()=>{
   members.forEach(m=>{
