@@ -73,6 +73,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-col
   <div class="header">
     <div><h1>🎨 アート教室 名簿管理</h1><p>Cosmic art Mira｜退会フォームデータ読込済み</p></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span id="save-status" style="font-size:11px;color:var(--text3);margin-right:4px"></span>
+      <button class="btn" onclick="saveAll();showSaveStatus()" style="font-size:12px">💾 保存</button>
       <button class="btn" onclick="openImp()">📥 データ取込</button>
       <button class="btn" onclick="openStaff()">👥 スタッフ</button>
       <button class="btn btn-p" onclick="openAdd()">＋ 生徒追加</button>
@@ -1929,6 +1931,101 @@ function saveStaff(){
   renderM();
 })();
 renderM();
+
+
+// ===== LocalStorage 自動保存 =====
+const SAVE_KEY = 'mira_roster_v1';
+
+function saveAll(){
+  try{
+    const data = {
+      members: members,
+      attendance: attendance,
+      history: history,
+      nextId: nextId,
+      staffList: STAFF_LIST,
+      staffHours: STAFF_HOURS,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch(e){ console.warn('保存失敗:', e); }
+}
+
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    if(data.members && data.members.length > 0){
+      members.length = 0;
+      data.members.forEach(m => members.push(m));
+      nextId = data.nextId || (Math.max(...members.map(m=>m.id||0)) + 1);
+    }
+    if(data.attendance) Object.assign(attendance, data.attendance);
+    if(data.history && data.history.length > 0){
+      history.length = 0;
+      data.history.forEach(h => history.push(h));
+    }
+    if(data.staffList && data.staffList.length > 0){
+      STAFF_LIST.length = 0;
+      data.staffList.forEach(s => STAFF_LIST.push(s));
+    }
+    if(data.staffHours){
+      Object.keys(STAFF_HOURS).forEach(k => delete STAFF_HOURS[k]);
+      Object.assign(STAFF_HOURS, data.staffHours);
+    }
+    console.log('読み込み完了:', members.length, '名 / 保存日時:', data.savedAt);
+    return true;
+  } catch(e){ console.warn('読み込み失敗:', e); return false; }
+}
+
+// データ変更時に自動保存するラッパー
+function autoSaveAfter(fn){
+  return function(){
+    fn.apply(this, arguments);
+    saveAll();
+  };
+}
+
+// 保存状態表示
+function showSaveStatus(){
+  let el = document.getElementById('save-status');
+  if(!el) return;
+  el.textContent = '💾 保存済 ' + new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  el.style.color = 'var(--green)';
+}
+
+
+// 各操作後に自動保存
+const _origSaveEdit = saveEdit;
+saveEdit = function(){ _origSaveEdit(); saveAll(); showSaveStatus(); };
+
+const _origAddM = addM;
+addM = function(){ _origAddM(); saveAll(); showSaveStatus(); };
+
+const _origConfLeave = confLeave;
+confLeave = function(){ _origConfLeave(); saveAll(); showSaveStatus(); };
+
+const _origMarkD = markD;
+markD = function(i){ _origMarkD(i); saveAll(); showSaveStatus(); };
+
+const _origQuickStaff = quickStaff;
+quickStaff = function(ds,idx,name){ _origQuickStaff(ds,idx,name); saveAll(); };
+
+const _origSaveStaff = saveStaff;
+saveStaff = function(){ _origSaveStaff(); saveAll(); showSaveStatus(); };
+
+// 出席チェックも自動保存（attendance変更後）
+function markAttend(ds, memberId, val){
+  if(!attendance[ds]) attendance[ds]={};
+  attendance[ds]['_'+memberId] = val;
+  saveAll();
+}
+
+// 初回ロード
+const _loaded = loadAll();
+if(_loaded){ renderM(); }
+showSaveStatus();
 
 </script>
 </body>
