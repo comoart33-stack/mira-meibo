@@ -1223,12 +1223,12 @@ const SCHEDULE = [
   // 建築 水木17:00〜18:30
   {id:'kenchiku_hira', label:'④建築造形', cap:4, dcap:5, bg:'#bbdefb',
    slots:[{days:[3,4], week:0, time:'17:00〜18:30'}],
-   match: m => m.note&&m.note.includes('建築')&&(m.day||'').split('/').some(d=>['水','木'].includes(d.trim()))&&!(m.note||'').includes('第2,4水')
+   match: () => false
   },
   // 建築 土13:00〜14:30
-  {id:'kenchiku_sat', label:'④建築造形', cap:8, dcap:5, bg:'#bbdefb',
-   slots:[{days:[6], week:0, time:'13:00〜14:30'}],
-   match: m => m.note&&m.note.includes('建築')&&(m.day||'').includes('土')
+  {id:'kenchiku_sat24', label:'④建築造形', cap:8, dcap:5, bg:'#bbdefb',
+   slots:[{days:[6], week:2, time:'13:00〜14:30(第2土)'},{days:[6], week:4, time:'13:00〜14:30(第4土)'}],
+   match: m => m.note&&m.note.includes('建築')&&(m.day||'').includes('土')&&(m.note||'').includes('第2,4土')
   },
   // Jr.アトリエ 第1,3日曜 10:00〜12:00
   {id:'jr_12', label:'Jr.アトリエ', cap:10, dcap:8, bg:'#b3e5fc',
