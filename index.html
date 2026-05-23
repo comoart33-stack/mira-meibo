@@ -1876,8 +1876,6 @@ function openEdit(id){
   document.querySelectorAll('input[name="e-cls"]').forEach(cb=>{
     cb.checked = note.includes(cb.value);
   });
-  // スロット表示
-  renderSlots(m);
   document.getElementById('eo').classList.add('open');
 }
 
