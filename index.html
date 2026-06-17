@@ -458,7 +458,7 @@ const ROSTER_DATA = [
   {name:'高橋 和馬',kana:'たかはしかずま',tel:'',day:'火',time:'16:45',fee:'8800',grade:'小3',note:'個別　第2,4火16:45',status:'active',joinDate:'2026-03-01'},
   {name:'髙橋 史佳',kana:'たかはしふみか',tel:'08020461092',day:'土',time:'11:00',fee:'8000',grade:'小4',note:'小学生　第2,4土11:00',status:'active',joinDate:'2026-03-01'},
   {name:'高橋真由実',kana:'たかはしまゆみ',tel:'08050041581',day:'木',time:'17:10',fee:'9800',grade:'小2',note:'小学生',status:'active',joinDate:'2026-03-01'},
-  {name:'高柳 七楓',kana:'たかやなぎななか',tel:'09040385783',day:'日',time:'13:00/11:00',fee:'9800',grade:'小1',note:'小学生　第1,3日13:00',status:'active',joinDate:'2026-03-01'},
+  {name:'高柳 七楓',kana:'たかやなぎななか',tel:'09040385783',day:'土/日',time:'10:00/15:30/13:00',fee:'9800',grade:'小1',note:'小学生　第1土10:00・第3日15:30・第4日13:00',status:'active',joinDate:'2026-03-01'},
   {name:'瀧 千咲',kana:'たきちさき',tel:'09091502576',day:'土',time:'15:30',fee:'7000',note:'小学生　第1,3土15:30',status:'active',joinDate:'2026-03-01'},
   {name:'瀧 日和',kana:'たきひより',tel:'09091502576',day:'土',time:'13:00',fee:'9500',grade:'中2',note:'工芸デザイン　第1,3土13:00',status:'active',joinDate:'2026-03-01'},
   {name:'竹内新',kana:'たけうちあらた',tel:'09073489116',day:'月',time:'15:10',fee:'8600',grade:'年長',note:'幼児',status:'active',joinDate:'2026-03-01'},
@@ -783,7 +783,7 @@ function nextM(){calM2++;if(calM2>12){calM2=1;calY++}renderCal();}
 // week: 0=全週, 1=第1, 2=第2, 3=第3, 4=第4, 13=第1&3, 24=第2&4
 
 
-const MULTI_CLASS_NAMES = ['倉田 仁','柴 悠人','田中陽周','平出 雫月','松下 鈴','村田愛佳','吉場 なつ','與那嶺 侑佳','渡辺 帆南','武藤凪花','石井律'];
+const MULTI_CLASS_NAMES = ['倉田 仁','柴 悠人','田中陽周','平出 雫月','松下 鈴','村田愛佳','吉場 なつ','與那嶺 侑佳','渡辺 帆南','武藤凪花','石井律','高柳 七楓'];
 
 const SCHEDULE = [
   // 個別アトリエ: 月火金 15:00〜18:15, 土日 15:00〜18:15
@@ -1350,6 +1350,18 @@ const SCHEDULE = [
   {id:'multi_ishii_kin13', label:'②イラスト', cap:4, dcap:5, bg:'#ffcdd2',
    slots:[{days:[5], week:1, time:'17:00〜18:30(第1金)'},{days:[5], week:3, time:'17:00〜18:30(第3金)'}],
    match: m => m.name==='石井律'
+  },
+  {id:'multi_takayanagi_sat1', label:'小学生', cap:12, dcap:8, bg:'#fff9c4',
+   slots:[{days:[6], week:1, time:'10:00〜11:15(第1土)'}],
+   match: m => m.name==='高柳 七楓'
+  },
+  {id:'multi_takayanagi_sun3', label:'小学生', cap:6, dcap:10, bg:'#fff9c4',
+   slots:[{days:[0], week:3, time:'15:30〜16:45(第3日)'}],
+   match: m => m.name==='高柳 七楓'
+  },
+  {id:'multi_takayanagi_sun4', label:'小学生', cap:6, dcap:10, bg:'#fff9c4',
+   slots:[{days:[0], week:4, time:'13:00〜14:15(第4日)'}],
+   match: m => m.name==='高柳 七楓'
   },
 
 ];
